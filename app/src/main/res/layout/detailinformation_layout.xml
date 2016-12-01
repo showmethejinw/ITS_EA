@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="지도, 상태 값, 연락처 정보.... 등등...."
+        android:textSize="20pt"
+        android:layout_gravity="center"
+        android:gravity="center"/>
+
+</LinearLayout>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!--준비, 대기, 이송, 복귀-->
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/tv_status"
+        android:text="출동중"
+        android:textSize="20pt"
+        android:background="#000000"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_weight="1"/>
+    <Button
+        android:id="@+id/btn_ready"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:text="준비"
+        android:textSize="30pt"/>
+
+    <Button
+        android:id="@+id/btn_waiting"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:text="대기"
+        android:textSize="30pt"/>
+    <Button
+        android:id="@+id/btn_transfer"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:text="이송"
+        android:textSize="30pt"/>
+    <Button
+        android:id="@+id/btn_return"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:text="복귀"
+        android:textSize="30pt"/>
+
+</LinearLayout>

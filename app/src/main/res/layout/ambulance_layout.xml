@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/first"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="신고 할당 테이블"
+        android:textSize="20pt"
+        android:textStyle="bold"
+        android:background="#000000"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        />
+    <ListView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/listview"
+        android:layout_below="@id/first"/>
+</LinearLayout>
