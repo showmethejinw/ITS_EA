@@ -5,6 +5,6 @@ package com.example.jang.its_ea.App;
  */
 
 public class AppConfig {
-    public static final String EPCIS_SERVER_CAPTURE =  "http://143.248.56.100:8080/epcis/";
-    public static final String EPCIS_SERVER_QUERY = "http://143.248.56.100:8080/epcis/";
+    public static final String EPCIS_SERVER_CAPTURE =  "http://125.131.73.79:4003/epcis/Service/EventCapture";
+    public static final String EPCIS_SERVER_QUERY = "http://125.131.73.79:4003/epcis/Service/Poll/SimpleEventQuery";
 }

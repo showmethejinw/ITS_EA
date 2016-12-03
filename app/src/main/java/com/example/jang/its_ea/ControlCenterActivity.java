@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.location.Geocoder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,8 +23,10 @@ import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.Toast;
 
+import com.example.jang.its_ea.helper.AccidentInfo;
 import com.example.jang.its_ea.helper.IconTextItem;
 import com.example.jang.its_ea.helper.IconTextListAdapter;
+import com.example.jang.its_ea.helper.RequestCapture;
 
 public class ControlCenterActivity extends AppCompatActivity {
 
@@ -39,7 +42,7 @@ public class ControlCenterActivity extends AppCompatActivity {
     private ListView listview;
     private IconTextListAdapter adapter;
 
-
+    private AccidentInfo accidentInfo;
 
     @Override
     public void onBackPressed() {
@@ -55,6 +58,7 @@ public class ControlCenterActivity extends AppCompatActivity {
         setContentView(R.layout.testing_layout);
 
         init();
+
 
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -76,25 +80,76 @@ public class ControlCenterActivity extends AppCompatActivity {
                         && et_phonenumber.getText().toString().equals("")
                         && et_hospitaladdress.getText().toString().equals(""))
                     Toast.makeText(getApplicationContext(), "입력되지 않은 정보가 존재합니다.", Toast.LENGTH_SHORT).show();
-                else
+                else        //  등록할 수 있음
                 {
-                    String patient_address, age, symptom, name, phonenumber, hostpitaladdress;
+                    String address, age, symptom, name, phonenumber, hostpital;
                     double patient_lat, patient_lon, hospital_lat, hospital_lon;
 
-                    patient_address = et_address.getText().toString();
+
+                    address = et_address.getText().toString();
                     age = et_age.getText().toString();
                     symptom = et_symptom.getText().toString();
                     name = et_name.getText().toString();
                     phonenumber = et_phonenumber.getText().toString();
-                    hostpitaladdress = et_hospitaladdress.getText().toString();
+                    hostpital = et_hospitaladdress.getText().toString();
 
+                    accidentInfo = new AccidentInfo();
+                    accidentInfo.setAccidentType(emergency);
+                    accidentInfo.setAddress(address);
+                    accidentInfo.setAge(age);
+                    accidentInfo.setSymptom(symptom);
+                    accidentInfo.setName(name);
+                    accidentInfo.setPhoneNumber(phonenumber);
+                    accidentInfo.setHospitalAddress(hostpital);
+
+
+                    String eventDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format((System.currentTimeMillis()));
+                    String eventTime = new java.text.SimpleDateFormat("HH:mm:ss").format((System.currentTimeMillis()));
+
+                    RequestCapture epcis = new RequestCapture();
+
+                    String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+                            "<!DOCTYPE project>\n" +
+                            "        <!-- xmlns:accident=\".xsd\"가 새로운 태그를 추가시킬 수 있다!-->\n" +
+                            "<epcis:EPCISDocument xmlns:epcis=\"urn:epcglobal:epcis:xsd:1\" \n" +
+                            "xmlns:accident=\".xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
+                            "                     schemaVersion=\"1.2\" creationDate=\"2016-11-13T11:30:47.0Z\">\n" +
+                            "  <EPCISBody>\n" +
+                            "    <EventList>\n" +
+                            "      <ObjectEvent>\n" +
+                            "        <!-- When -->\n" +
+                            "        <eventTime>" + eventDate + "T" + eventTime + ".116-10:00</eventTime>\n" +
+                            "        <eventTimeZoneOffset>-10:00</eventTimeZoneOffset>\n" +
+                            "        <!-- When! -->\n" +
+                            "\n" +
+                            "        <!--  What  -->\n" +
+                            "        <epcList>\n" +
+                            "          <epc>urn:epc:id:gdti:0614141.06012.1234</epc>\n" +
+                            "          </epcList>\n" +
+                            "        <!-- What!  -->\n" +
+                            "\n" +
+                            "        <!-- Add, Observe, Delete -->\n" +
+                            "        <action>ADD</action>\n" +
+                            "        <!-- Where!  address, age, symptom, name, phonenumber, hostpital; -->\n" +
+                            "            <accident:age>" + accidentInfo.getAge()+ "</accident:age>\n" +
+                            "            <accident:symptom>" + accidentInfo.getSymptom()+ "</accident:symptom>\n" +
+                            "            <accident:name>" + accidentInfo.getName()+ "</accident:name>\n" +
+                            "            <accident:phonenumber>" + accidentInfo.getPhoneNumber()+ "</accident:phonenumber>\n" +
+                            "            <accident:hostpital>" + accidentInfo.getHospitalAddress()+ "</accident:hostpital>\n" +
+                            "            <accident:type>" + accidentInfo.getAccidentType()+ "</accident:type>\n" +
+                            "      </ObjectEvent>\n" +
+                            "    </EventList>\n" +
+                            "  </EPCISBody>\n" +
+                            "</epcis:EPCISDocument>";
+                    Log.d("xml___",xml);
+                    epcis.execute(xml);
 
                     try {
                         /**환자 주소, 이송할 병원 좌표 계산**/
-                        patient_lat =  geocoder.getFromLocationName(patient_address, 1).get(0).getLatitude();
-                        patient_lon =  geocoder.getFromLocationName(patient_address, 1).get(0).getLongitude();
-                        hospital_lat = geocoder.getFromLocationName(hostpitaladdress, 1).get(0).getLatitude();
-                        hospital_lon = geocoder.getFromLocationName(hostpitaladdress, 1).get(0).getLongitude();
+                        patient_lat =  geocoder.getFromLocationName(address, 1).get(0).getLatitude();
+                        patient_lon =  geocoder.getFromLocationName(address, 1).get(0).getLongitude();
+                        hospital_lat = geocoder.getFromLocationName(hostpital, 1).get(0).getLatitude();
+                        hospital_lon = geocoder.getFromLocationName(hostpital, 1).get(0).getLongitude();
 
 //                        Toast.makeText(getApplicationContext(), String.valueOf(lat) + ", " + String.valueOf(lon),Toast.LENGTH_SHORT).show();
                     }

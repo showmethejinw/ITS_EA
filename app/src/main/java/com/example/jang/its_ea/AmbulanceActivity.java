@@ -8,19 +8,31 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.Xml;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.jang.its_ea.helper.AccidentInfo;
 import com.example.jang.its_ea.helper.IconTextItem;
 import com.example.jang.its_ea.helper.IconTextListAdapter;
+import com.example.jang.its_ea.helper.OnEventListener;
+import com.example.jang.its_ea.helper.RequestQuery;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.XML;
 
 public class AmbulanceActivity extends AppCompatActivity {
 
     private ListView listview;
     private IconTextListAdapter adapter;
+    private JSONObject json;
+    private AccidentInfo accidentInfo;
+    private RequestQuery requestQuery;
+    private static final String TAG="AM";
 
     @Override
     protected void onResume() {
@@ -53,6 +65,7 @@ public class AmbulanceActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
+                                queryEvent();
 
                                 Toast.makeText(getApplicationContext(), "출동 할당 완료", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(getApplicationContext(), AmbulanceSelectActivity.class);
@@ -79,12 +92,57 @@ public class AmbulanceActivity extends AppCompatActivity {
 
 
     }
+    private void queryEvent() {
+
+        RequestQuery epcis = new RequestQuery(getApplicationContext(), new OnEventListener<String>() {
+            @Override
+            public void onSuccess(String result) {
+                Log.d(TAG, "query result = " + result);
+//                try
+//                {
+//                    json = XML.toJSONObject(result);
+//                    Log.d("json.tostring",json.getJSONArray("epcList").toString());
+//                    ;
+//                }catch (Exception e)
+//                {
+//
+//                }
+
+
+                try{
+                    String Stringtest = "";
+                    json = XML.toJSONObject(result);
+                    Log.d("json.tostring",json.toString());
+                    JSONObject t1 = json.getJSONObject("EPCISQueryDocumentType");
+                    JSONObject t2 =
+                    JSONArray ja = json.getJSONArray("epcList");
+                    for (int i = 0; i < ja.length(); i++){
+                        JSONObject order = ja.getJSONObject(i);
+                        Stringtest += "test: " + order.getString("epc") + "\n";
+                        Log.d("Stringtest",Stringtest);
+                    }
+                }catch (Exception e)
+                {
+
+                }
+
+
+
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Log.i(TAG, "Failted to query from epcis");
+            }
+        });
+        epcis.execute();
+    }
 
     public void init() {
         listview = (ListView) findViewById(R.id.listview);
         adapter = new IconTextListAdapter(this);
 
         listview.setAdapter(adapter);
+        accidentInfo = new AccidentInfo();
 
     }
 

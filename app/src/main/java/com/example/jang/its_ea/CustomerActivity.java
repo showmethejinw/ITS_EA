@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 
 import com.example.jang.its_ea.helper.MarkerItem;
+import com.example.jang.its_ea.helper.OnEventListener;
 import com.example.jang.its_ea.helper.RequestCapture;
 import com.example.jang.its_ea.helper.RequestQuery;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -242,10 +243,20 @@ public class CustomerActivity extends Activity implements
     }
 
     private void queryEvent() {
-        RequestQuery epcis = new RequestQuery();
 
+        RequestQuery epcis = new RequestQuery(getApplicationContext(), new OnEventListener<String>() {
+            @Override
+            public void onSuccess(String result) {
+                Log.d(TAG, "query result = " + result);
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Log.i(TAG, "Failted to query from epcis");
+            }
+        });
         epcis.execute();
     }
+
     private void updateEvent(String event) {
         RequestCapture epcis = new RequestCapture();
 
