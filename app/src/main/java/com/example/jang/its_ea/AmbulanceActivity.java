@@ -142,7 +142,6 @@ public class AmbulanceActivity extends AppCompatActivity {
         RequestQuery epcis = new RequestQuery(getApplicationContext(), new OnEventListener<String>() {
             @Override
             public void onSuccess(String result) {
-
                 InputStream input;
 
                 try {
@@ -150,11 +149,8 @@ public class AmbulanceActivity extends AppCompatActivity {
                     start(input);
                 }catch (Exception e)
                 {
-
                 }
-
             }
-            @Override
             public void onFailure(Exception e) {
                 Log.i(TAG, "Failted to query from epcis");
             }
