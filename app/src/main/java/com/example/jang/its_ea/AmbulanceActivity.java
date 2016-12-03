@@ -114,7 +114,6 @@ public class AmbulanceActivity extends AppCompatActivity {
                     json = XML.toJSONObject(result);
                     Log.d("json.tostring",json.toString());
                     JSONObject t1 = json.getJSONObject("EPCISQueryDocumentType");
-                    JSONObject t2 =
                     JSONArray ja = json.getJSONArray("epcList");
                     for (int i = 0; i < ja.length(); i++){
                         JSONObject order = ja.getJSONObject(i);
