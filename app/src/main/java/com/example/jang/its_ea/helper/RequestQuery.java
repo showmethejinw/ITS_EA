@@ -12,9 +12,7 @@ import java.io.IOException;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
-
 
 /**
  * Created by jang on 2016-12-01.
@@ -41,7 +39,7 @@ public class RequestQuery  extends AsyncTask<String, Void, String> {
 
         try {
             //String url = params[0];
-            String url = AppConfig.EPCIS_SERVER_QUERY;
+            String url = "http://125.131.73.79:4003/epcis/Service/Poll/SimpleEventQuery?eventCountLimit=1&GE_eventTime=2016-12-04T08:50:44.116Z&";
             Request request = new Request.Builder()
                     .url(url)
                     .get()
@@ -53,12 +51,13 @@ public class RequestQuery  extends AsyncTask<String, Void, String> {
         } catch (Exception e) {
             mException = e;
         }
+
         return null;
     }
 
     @Override
     protected void onPostExecute(String result) {
-        Log.i("result", result);
+   //     Log.i("result", result);
         if (mCallback != null) {
             mCallback.onSuccess(result);
         } else {
@@ -66,5 +65,7 @@ public class RequestQuery  extends AsyncTask<String, Void, String> {
         }
         return ;
     }
+
+
 }
 

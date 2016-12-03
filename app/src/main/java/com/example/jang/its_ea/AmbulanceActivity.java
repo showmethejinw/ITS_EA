@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Xml;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -21,9 +20,17 @@ import com.example.jang.its_ea.helper.IconTextListAdapter;
 import com.example.jang.its_ea.helper.OnEventListener;
 import com.example.jang.its_ea.helper.RequestQuery;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.XML;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 
 public class AmbulanceActivity extends AppCompatActivity {
 
@@ -65,8 +72,8 @@ public class AmbulanceActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
-                                queryEvent();
 
+                                queryEvent();
                                 Toast.makeText(getApplicationContext(), "출동 할당 완료", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(getApplicationContext(), AmbulanceSelectActivity.class);
                                 startActivity(intent);
@@ -92,41 +99,59 @@ public class AmbulanceActivity extends AppCompatActivity {
 
 
     }
+
+    private Document parseXML(InputStream stream) throws Exception{
+
+        DocumentBuilderFactory objDocumentBuilderFactory = null;
+        DocumentBuilder objDocumentBuilder = null;
+        Document doc = null;
+
+        try{
+
+            objDocumentBuilderFactory = DocumentBuilderFactory.newInstance();
+            objDocumentBuilder = objDocumentBuilderFactory.newDocumentBuilder();
+
+            doc = objDocumentBuilder.parse(stream);
+
+        }catch(Exception ex){
+            throw ex;
+        }
+
+        return doc;
+    }
+
+    private void start(InputStream input) throws Exception{
+        Document doc = parseXML(input);
+        NodeList descNodes = doc.getElementsByTagName("ObjectEvent");
+
+
+        for(int i=0; i<descNodes.getLength();i++){
+
+            for(Node node = descNodes.item(i).getFirstChild(); node!=null; node=node.getNextSibling()){ //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
+
+                if(node.getNodeName().equals("eventTime")){
+                    Log.d(TAG, node.getTextContent());      //결과값
+                }
+            }
+
+        }
+    }
+
     private void queryEvent() {
 
         RequestQuery epcis = new RequestQuery(getApplicationContext(), new OnEventListener<String>() {
             @Override
             public void onSuccess(String result) {
-                Log.d(TAG, "query result = " + result);
-//                try
-//                {
-//                    json = XML.toJSONObject(result);
-//                    Log.d("json.tostring",json.getJSONArray("epcList").toString());
-//                    ;
-//                }catch (Exception e)
-//                {
-//
-//                }
 
+                InputStream input;
 
-                try{
-                    String Stringtest = "";
-                    json = XML.toJSONObject(result);
-                    Log.d("json.tostring",json.toString());
-                    JSONObject t1 = json.getJSONObject("EPCISQueryDocumentType");
-                    JSONObject t2 =
-                    JSONArray ja = json.getJSONArray("epcList");
-                    for (int i = 0; i < ja.length(); i++){
-                        JSONObject order = ja.getJSONObject(i);
-                        Stringtest += "test: " + order.getString("epc") + "\n";
-                        Log.d("Stringtest",Stringtest);
-                    }
+                try {
+                    input = new ByteArrayInputStream(result.getBytes("utf-8"));
+                    start(input);
                 }catch (Exception e)
                 {
 
                 }
-
-
 
             }
             @Override
