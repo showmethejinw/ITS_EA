@@ -1,5 +1,6 @@
 package com.example.jang.its_ea.helper;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -25,8 +26,16 @@ public class RequestQuery  extends AsyncTask<String, Void, String> {
     static String url = AppConfig.EPCIS_SERVER_QUERY;
     public static final MediaType mediaType = MediaType.parse("application/xml; charset=utf-8");
     private static final String TAG = "RequestQuery";
+    private Context mContext;
+    private Exception mException;
+    private OnEventListener<String>  mCallback;
 
     private static String var1 = "TEST";
+
+    public RequestQuery(Context context, OnEventListener callback) {
+        mCallback = callback;
+        mContext = context;
+    }
     @Override
     protected String doInBackground(String... params) {
 
@@ -41,6 +50,8 @@ public class RequestQuery  extends AsyncTask<String, Void, String> {
             return response.body().string();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            mException = e;
         }
         return null;
     }
@@ -48,6 +59,11 @@ public class RequestQuery  extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String result) {
         Log.i("result", result);
+        if (mCallback != null) {
+            mCallback.onSuccess(result);
+        } else {
+            mCallback.onFailure(mException);
+        }
         return ;
     }
 }
