@@ -3,7 +3,6 @@ package com.example.jang.its_ea;
 /**
  * Created by jang on 2016-12-01.
  */
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,6 +20,7 @@ import com.example.jang.its_ea.helper.AccidentInfo;
 import com.example.jang.its_ea.helper.IconTextItem;
 import com.example.jang.its_ea.helper.IconTextListAdapter;
 import com.example.jang.its_ea.helper.OnEventListener;
+import com.example.jang.its_ea.helper.RequestCapture;
 import com.example.jang.its_ea.helper.RequestQuery;
 
 import org.json.JSONObject;
@@ -116,6 +116,9 @@ public class AmbulanceActivity extends AppCompatActivity {
                 btn_standby.setBackgroundColor(originColor);
                 btn_standby.setClickable(true);
                 btn_standby.setTextColor(Color.BLACK);
+
+                updateEvent("preparing","inactive");
+
             }
         });
 
@@ -131,6 +134,9 @@ public class AmbulanceActivity extends AppCompatActivity {
                 btn_standby.setClickable(false);
                 btn_prepare.setTextColor(Color.BLACK);
                 flag = 0;
+
+                updateEvent("waiting","ready");
+
             }
         });
 
@@ -272,5 +278,54 @@ public class AmbulanceActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void updateEvent(String event, String event2) {
+        RequestCapture epcis = new RequestCapture();
+
+        String eventDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format((System.currentTimeMillis()));
+        String eventTime = new java.text.SimpleDateFormat("HH:mm:ss").format((System.currentTimeMillis()));
+
+        Log.d(TAG, "updateEvent");
+
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+                "<!DOCTYPE project>\n" +
+                "<epcis:EPCISDocument xmlns:epcis=\"urn:epcglobal:epcis:xsd:1\" \n" +
+                "                     schemaVersion=\"1.2\" creationDate=\"2016-11-13T11:30:47.0Z\">\n" +
+                "  <EPCISBody>\n" +
+                "    <EventList>\n" +
+                "      <ObjectEvent>\n" +
+                "        <!-- When -->\n" +
+                "        <eventTime>" + eventDate + "T" + eventTime + ".116-10:00</eventTime>\n" +
+                "        <eventTimeZoneOffset>-10:00</eventTimeZoneOffset>\n" +
+                "        <!-- When! -->\n" +
+                "\n" +
+                "        <!--  What -->\n" +
+                "        <epcList>\n" +
+                "          <epc>urn:epc:id:sgtin:0614141.112345.12345</epc>\n" +
+                "        </epcList>\n" +
+                "        <!-- What!-->\n" +
+                "\n" +
+                "        <!-- Add, Observe, Delete -->\n" +
+                "        <action>ADD</action>\n" +
+                "\n" +
+                "        <!-- Why -->\n" +
+                "        <bizStep>urn:epcglobal:cbv:bizstep:"+ event +"</bizStep>\n" +
+                "        <disposition>urn:epcglobal:cbv:disp:" + event2 + "</disposition>\n" +
+                "        <!-- Why! -->\n" +
+                "\n" +
+                "        <!-- Where -->\n" +
+                "        <bizLocation>\n" +
+                "          <id>urn:epc:id:sgln:7654321.54321.1234</id>\n" +
+                "          <extension>\n" +
+                "            <geo>" + 0 + "," + 0 + "</geo>\n" +
+                "          </extension>\n" +
+                "        </bizLocation>\n" +
+                "        <!-- Where! -->\n" +
+                "      </ObjectEvent>\n" +
+                "    </EventList>\n" +
+                "  </EPCISBody>\n" +
+                "</epcis:EPCISDocument>";
+        epcis.execute(xml);
     }
 }
