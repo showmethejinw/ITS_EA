@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Geocoder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -47,6 +48,14 @@ public class AmbulanceActivity extends AppCompatActivity {
     private int originColor;
     private int flag = 0;
     private int number;
+
+    private double patient_lat,patient_lon,hospital_lat,hospital_lon;
+    private String eventDate,eventTime;
+
+    private Geocoder geocoder;
+
+    private static final String SGTIN = "urn:epc:id:sgtin:4012345.077889.25";
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -85,7 +94,7 @@ public class AmbulanceActivity extends AppCompatActivity {
                                 Intent intent = new Intent(getApplicationContext(), AmbulanceSelectActivity.class);
                                 intent.putExtra("OBJECT", accidentInfo[number]);
                                 startActivity(intent);
-                                finish();
+//                                finish();
 
                                 onResume();
                             }
@@ -136,6 +145,7 @@ public class AmbulanceActivity extends AppCompatActivity {
                 flag = 0;
 
                 updateEvent("waiting","ready");
+                queryEvent();
 
             }
         });
@@ -213,6 +223,10 @@ public class AmbulanceActivity extends AppCompatActivity {
                 else if(node.getNodeName().equals("accident:type"))
                 {
                     accidentInfo[i].setAccidentType(node.getTextContent());
+                }
+                else if(node.getNodeName().equals("epcList"))
+                {
+                    accidentInfo[i].setGdtiId(node.getTextContent().replace(" ","").split(":")[4]);
                 }
 
             }
@@ -302,7 +316,7 @@ public class AmbulanceActivity extends AppCompatActivity {
                 "\n" +
                 "        <!--  What -->\n" +
                 "        <epcList>\n" +
-                "          <epc>urn:epc:id:sgtin:0614141.112345.12345</epc>\n" +
+                "          <epc> " + SGTIN + "</epc>\n" +
                 "        </epcList>\n" +
                 "        <!-- What!-->\n" +
                 "\n" +
@@ -327,5 +341,85 @@ public class AmbulanceActivity extends AppCompatActivity {
                 "  </EPCISBody>\n" +
                 "</epcis:EPCISDocument>";
         epcis.execute(xml);
+    }
+
+    public void assignTask(String event, String event2)
+    {
+        RequestCapture epcis = new RequestCapture();
+
+        setAssignInfo();
+
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+                "<!DOCTYPE project>\n" +
+                "        <!-- xmlns:accident=\".xsd\"가 새로운 태그를 추가시킬 수 있다!-->\n" +
+                "<epcis:EPCISDocument xmlns:epcis=\"urn:epcglobal:epcis:xsd:1\" \n" +
+                "xmlns:accident=\".xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
+                "                     schemaVersion=\"1.2\" creationDate=\"2016-11-13T11:30:47.0Z\">\n" +
+                "  <EPCISBody>\n" +
+                "    <EventList>\n" +
+                "      <ObjectEvent>\n" +
+                "        <!-- When -->\n" +
+                "        <eventTime>" + eventDate + "T" + eventTime + ".116-10:00</eventTime>\n" +
+                "        <eventTimeZoneOffset>-10:00</eventTimeZoneOffset>\n" +
+                "        <!-- When! -->\n" +
+                "\n" +
+                "        <!--  What  -->\n" +
+                "        <epcList>\n" +
+                "          <epc>urn:epc:id:gdti:" + accidentInfo[number].getGdtiId() + "</epc>\n" +
+                "          </epcList>\n" +
+                "        <!-- What!  -->\n" +
+                "\n" +
+                "        <!-- Add, Observe, Delete -->\n" +
+                "        <action>ADD</action>\n" +
+//                            "        <example:1>\n" +
+//                            "            <extension>ADD</extension>\n" +
+//                            "           <extension>ADD</extension>\n" +
+//                            "        </example:1>\n" +
+                "        <bizStep>urn:epcglobal:cbv:bizstep:"+ event +"</bizStep>\n" +
+                "        <disposition>urn:epcglobal:cbv:disp:" + event2 + "</disposition>\n" +
+
+                "        <!-- Where!  address, age, symptom, name, phonenumber, hostpital; -->\n" +
+
+                "        <!-- 할당 되지 않음 : 0  / 할당 됨 : 1-->\n" +
+                "        <accident:assign>" + 1 + "</accident:assign>\n" +
+                "        <accident:address>" + accidentInfo[number].getAddress()+ "</accident:address>\n" +
+                "        <accident:address_lat>" + patient_lat + "</accident:address_lat>\n" +
+                "        <accident:address_lon>" + patient_lon + "</accident:address_lon>\n" +
+                "        <accident:age>" + accidentInfo[number].getAge()+ "</accident:age>\n" +
+                "        <accident:symptom>" + accidentInfo[number].getSymptom() + "</accident:symptom>\n" +
+                "        <accident:name>" + accidentInfo[number].getName() + "</accident:name>\n" +
+                "        <accident:phonenumber>" + accidentInfo[number].getPhoneNumber() + "</accident:phonenumber>\n" +
+                "        <accident:hostpital>" + accidentInfo[number].getHospitalAddress() + "</accident:hostpital>\n" +
+                "        <accident:hostpital_lat>" + hospital_lat+ "</accident:hostpital_lat>\n" +
+                "        <accident:hostpital_lon>" + hospital_lon+ "</accident:hostpital_lon>\n" +
+                "        <accident:type>" + accidentInfo[number].getAccidentType()+ "</accident:type>\n" +
+
+                "      </ObjectEvent>\n" +
+                "    </EventList>\n" +
+                "  </EPCISBody>\n" +
+                "</epcis:EPCISDocument>";
+        Log.d("xml___",xml);
+        epcis.execute(xml);
+
+    }
+
+    public void setAssignInfo()
+    {
+        geocoder = new Geocoder(this);
+        eventDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format((System.currentTimeMillis()));
+        eventTime = new java.text.SimpleDateFormat("HH:mm:ss").format((System.currentTimeMillis()));
+        try {
+            /**환자 주소, 이송할 병원 좌표 계산**/
+            patient_lat =  geocoder.getFromLocationName(accidentInfo[number].getAddress(), 1).get(0).getLatitude();
+            patient_lon =  geocoder.getFromLocationName(accidentInfo[number].getAddress(), 1).get(0).getLongitude();
+            hospital_lat = geocoder.getFromLocationName(accidentInfo[number].getHospitalAddress(), 1).get(0).getLatitude();
+            hospital_lon = geocoder.getFromLocationName(accidentInfo[number].getHospitalAddress(), 1).get(0).getLongitude();
+
+//                        Toast.makeText(getApplicationContext(), String.valueOf(lat) + ", " + String.valueOf(lon),Toast.LENGTH_SHORT).show();
+        }
+        catch (Exception e)
+        {
+
+        }
     }
 }

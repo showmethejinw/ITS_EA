@@ -149,6 +149,6 @@ public class DetailInformationActivity extends Activity {
             }
         });
         epcis.execute("MATCH_epc=urn:epc:id:gdti:"+ accidentinfo.getGdtiId() +
-                      "&orderBy=eventTime&eventCountLimit");
+                      "&orderBy=eventTime&eventCountLimit=1&");
     }
 }

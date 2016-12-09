@@ -49,6 +49,8 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
     private LocationRequest mLocationRequest;
 
     private static final int  REQUEST_CODE_LOCATION = 2;
+    private static final String SGTIN = "urn:epc:id:sgtin:4012345.077889.25";
+
 
     @Override
     protected void onStop() {
@@ -90,6 +92,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
                 updateEvent("returning", "in_progress");
                 assignTask("closing", "completed");
                 Intent intent = new Intent(getApplicationContext(), AmbulanceActivity.class);
+                intent.putExtra("OBJECT", accidentInfo);
                 startActivity(intent);
                 finish();
             }
@@ -150,7 +153,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
                 "\n" +
                 "        <!--  What  -->\n" +
                 "        <epcList>\n" +
-                "          <epc>urn:epc:id:gdti:0614141.06012.1234</epc>\n" +
+                "          <epc>urn:epc:id:gdti:" + accidentInfo.getGdtiId() + "</epc>\n" +
                 "          </epcList>\n" +
                 "        <!-- What!  -->\n" +
                 "\n" +
@@ -230,7 +233,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
                 "\n" +
                 "        <!--  What -->\n" +
                 "        <epcList>\n" +
-                "          <epc>urn:epc:id:sgtin:0614141.112345.12345</epc>\n" +
+                "          <epc>" + SGTIN + "</epc>\n" +
                 "        </epcList>\n" +
                 "        <!-- What!-->\n" +
                 "\n" +
