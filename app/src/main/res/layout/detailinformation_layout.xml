@@ -5,6 +5,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/accInfo"
         android:text="지도, 상태 값, 연락처 정보.... 등등...."
         android:textSize="20pt"
         android:layout_gravity="center"

@@ -406,6 +406,6 @@ public class ControlCenterActivity extends AppCompatActivity {
                 Log.i("fail", "Failted to query from epcis");
             }
         });
-        epcis.execute("");
+        epcis.execute("EQ_bizStep=urn:epcglobal:cbv:bizstep:opening");
     }
 }
