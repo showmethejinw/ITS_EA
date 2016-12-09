@@ -36,8 +36,9 @@ public class DetailInformationActivity extends Activity {
     public void onBackPressed() {
         super.onBackPressed();
 
-        Intent intent = new Intent(getApplicationContext(), ControlCenterActivity.class);
-        startActivity(intent);
+//        Intent intent = new Intent(getApplicationContext(), ControlCenterActivity.class);
+//        intent.putExtra("tab",true);
+//        startActivity(intent);
         finish();
     }
 
@@ -118,7 +119,6 @@ public class DetailInformationActivity extends Activity {
             }
             result =    "긴급도 : " + accidentinfo.getAccidentType() + "\n"
                             +  "주소 : " + accidentinfo.getAddress() + "\n"
-                            + "이름 : " + accidentinfo.getName() + "\n"
                             + "연령 : " + accidentinfo.getAge() + "\n"
                             + "신고자 이름 : " + accidentinfo.getName() + "\n"
                             + "신고자 연락처 : " + accidentinfo.getPhoneNumber() + "\n"

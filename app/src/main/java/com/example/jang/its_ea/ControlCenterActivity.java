@@ -245,7 +245,7 @@ public class ControlCenterActivity extends AppCompatActivity {
                                 Intent intent = new Intent(getApplicationContext(), DetailInformationActivity.class);
                                 intent.putExtra("gdti", accidentInfoList[number].getGdtiId());
                                 startActivity(intent);
-                                finish();
+                               // finish();
 
                                 onResume();
                             }
