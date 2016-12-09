@@ -40,6 +40,8 @@ import java.io.InputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import java.util.Random;
+
 public class ControlCenterActivity extends AppCompatActivity {
 
     private EditText et_address, et_symptom, et_age, et_name, et_phonenumber, et_hospitaladdress;
@@ -99,8 +101,8 @@ public class ControlCenterActivity extends AppCompatActivity {
                 {
                     String address, age, symptom, name, phonenumber, hostpital;
                     double patient_lat = 0, patient_lon = 0, hospital_lat = 0, hospital_lon = 0;
-
-
+                    int random_key = (int) (Math.random()*100000);
+                    String tempGDTI = "0614141.06012." + String.valueOf(random_key);
                     address = et_address.getText().toString();
                     age = et_age.getText().toString();
                     symptom = et_symptom.getText().toString();
@@ -117,7 +119,7 @@ public class ControlCenterActivity extends AppCompatActivity {
                     accidentInfo.setPhoneNumber(phonenumber);
                     accidentInfo.setHospitalAddress(hostpital);
                     accidentInfo.setStatus("opening");
-                    accidentInfo.setGdtiId("0614141.06012.1234");
+                    accidentInfo.setGdtiId(tempGDTI);
 
                     String eventDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format((System.currentTimeMillis()));
                     String eventTime = new java.text.SimpleDateFormat("HH:mm:ss").format((System.currentTimeMillis()));
@@ -155,7 +157,7 @@ public class ControlCenterActivity extends AppCompatActivity {
                             "\n" +
                             "        <!--  What  -->\n" +
                             "        <epcList>\n" +
-                            "          <epc>urn:epc:id:gdti:0614141.06012.1234</epc>\n" +
+                            "          <epc>urn:epc:id:gdti:" + accidentInfo.getGdtiId() + "</epc>\n" +
                             "          </epcList>\n" +
                             "        <!-- What!  -->\n" +
                             "\n" +
@@ -200,8 +202,6 @@ public class ControlCenterActivity extends AppCompatActivity {
                     et_hospitaladdress.setText("");
 
                 }
-
-
 
             }
 

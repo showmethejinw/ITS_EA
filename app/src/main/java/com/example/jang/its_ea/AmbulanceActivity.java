@@ -3,6 +3,7 @@ package com.example.jang.its_ea;
 /**
  * Created by jang on 2016-12-01.
  */
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -177,8 +178,8 @@ public class AmbulanceActivity extends AppCompatActivity {
                 if (node.getNodeName().equals("accident:address")) {
 
                     accidentInfo[i].setAddress(node.getTextContent());
-                    adapter.addItem(new IconTextItem(node.getTextContent()));
-                    listview.setAdapter(adapter);
+//                    adapter.addItem(new IconTextItem(node.getTextContent()));
+//                    listview.setAdapter(adapter);
 
                     Log.d("result_", node.getTextContent());      //결과값
                 }
@@ -210,6 +211,25 @@ public class AmbulanceActivity extends AppCompatActivity {
 
             }
 
+        }
+
+        for(int i = 0; i < accidentInfo.length; i++)
+        {
+            int count = 0;
+            for(int j = 0; j < accidentInfo.length; j++)
+            {
+                if(accidentInfo[i].getAddress().equals(accidentInfo[j].getAddress()))
+                {
+                    count++;
+                    if(count > 1)
+                        break;
+                }
+            }
+            if(count == 1)
+            {
+                adapter.addItem(new IconTextItem(accidentInfo[i].getAddress()));
+                listview.setAdapter(adapter);
+            }
         }
     }
 
