@@ -286,7 +286,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
         locationX = location.getLatitude();
         locationY = location.getLongitude();
 
-        updateEvent("returning", "in_progress");
+        updateEvent("departuring", "in_progress");
         Log.d("location___", locationX + ", " +  locationY);
     }
 
