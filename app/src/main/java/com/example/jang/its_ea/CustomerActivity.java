@@ -5,22 +5,54 @@ package com.example.jang.its_ea;
  */
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.jang.its_ea.helper.MarkerItem;
 import com.example.jang.its_ea.helper.OnEventListener;
-import com.example.jang.its_ea.helper.RequestCapture;
 import com.example.jang.its_ea.helper.RequestQuery;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 /**
  * 현재 위치의 지도를 보여주는 방법에 대해 알 수 있습니다.
  * <p>
@@ -30,51 +62,29 @@ import com.google.android.gms.maps.model.MarkerOptions;
  *
  * @author Mike
  */
-import android.location.Location;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationAvailability;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-
-import java.util.ArrayList;
-
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.util.DisplayMetrics;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 
 public class CustomerActivity extends Activity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback,GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
 
     static final LatLng SEOUL = new LatLng(37.56, 126.97);
-    private static final String TAG = "@@@";
+    private static final String TAG = "Customer";
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private static final int REQUEST_CODE_LOCATION = 2;
     private double locationX;
     private double locationY;
 
+    private double ambulanceLocationX, ambulanceLocationY;
+    private String nodeValueArray[];
+
     private GoogleMap googleMap;
 
     private ArrayList<MarkerItem> ambulance;        //marker
     private TextView tv_marker;
-    private  View marker_root_view;
+    private View marker_root_view;
+    private Marker mAmbulance01, mAmbulance02, mMyCar, mAccidentLocation;
+    private LatLng ambulance01, ambulance02, myCar, accidentLocation;
 
     @Override
     public void onBackPressed() {
@@ -100,22 +110,24 @@ public class CustomerActivity extends Activity implements
             return;
         }
         googleMap.setMyLocationEnabled(true);
+//        Marker seoul = googleMap.addMarker(new MarkerOptions().position(SEOUL)
+//                .title("Seoul"));
 
-        Marker seoul = googleMap.addMarker(new MarkerOptions().position(SEOUL)
-                .title("Seoul"));
-
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom( SEOUL, 5));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(SEOUL, 5));
 
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(5), 2000, null);
 
         googleMap.setOnMarkerClickListener(this);
         googleMap.setOnMapClickListener(this);
 
-        googleMap.addMarker(new MarkerOptions().position(new LatLng(37.48372341039549 , 127.04207226634026))
-                .title("ambulance"));
+/*        googleMap.addMarker(new MarkerOptions().position(new LatLng(37.48372341039549 , 127.04207226634026))
+                .title("ambulance"));*/
 
-        setCustomMarkerView();
-        getSampleMarkerItems();
+//        setCustomMarkerView();
+//        getSampleMarkerItems();
+
+        queryEvent();
+        updateMarkerPosition();
     }
 
     @Override
@@ -133,6 +145,8 @@ public class CustomerActivity extends Activity implements
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        queryEvent();
     }
 
     @Override
@@ -225,83 +239,81 @@ public class CustomerActivity extends Activity implements
         Marker seoul = googleMap.addMarker(new MarkerOptions().position(CURRENT_LOCATION)
                 .title("사용자 위치"));
 
-        googleMap.addMarker(new MarkerOptions().position(new LatLng(37.48372341039549 , 127.04207226634026))
-                .title("ambulance"));
-
-
+//        googleMap.addMarker(new MarkerOptions().position(new LatLng(37.48372341039549 , 127.04207226634026))
+//                .title("ambulance"));
 
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CURRENT_LOCATION, 16));
 
-        setCustomMarkerView();
-        getSampleMarkerItems();
+//        setCustomMarkerView();
+//        getSampleMarkerItems();
 
-//        queryEvent();
-        updateEvent("MOVING_START");
+        queryEvent();
+        updateMarkerPosition();
+    }
+
+    private Document parseXML(InputStream stream) throws Exception{
+
+        DocumentBuilderFactory objDocumentBuilderFactory = null;
+        DocumentBuilder objDocumentBuilder = null;
+        Document doc = null;
+
+        try{
+
+            objDocumentBuilderFactory = DocumentBuilderFactory.newInstance();
+            objDocumentBuilder = objDocumentBuilderFactory.newDocumentBuilder();
+
+            doc = objDocumentBuilder.parse(stream);
+
+        }catch(Exception ex){
+            throw ex;
+        }
+
+        return doc;
+    }
+
+    private void start(InputStream input) throws Exception{
+        Document doc = parseXML(input);
+        NodeList descNodes = doc.getElementsByTagName("bizLocation");
+        String nodeValue[] = new String[5];
+        for (int i = 0; i < descNodes.getLength(); i++) {
+            int j = 0;
+            for (Node node = descNodes.item(i).getFirstChild(); node != null; node = node.getNextSibling()) { //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
+
+                nodeValue[j] = node.getTextContent();
+                Log.d(TAG, "nodeValue [" + j + "]" + nodeValue[j]);  //결과값
+                ++j;
+            }
+        }
+
+        String gpsLocation = nodeValue[3];
+
+        nodeValueArray = gpsLocation.replace(" ","").split(",");
+        ambulanceLocationX = Double.parseDouble(nodeValueArray[0]);
+        ambulanceLocationY = Double.parseDouble(nodeValueArray[1]);
+        Log.d(TAG, "ambulanceLocationX : " + ambulanceLocationX +" ,ambulanceLocationY : " + ambulanceLocationY);
     }
 
     private void queryEvent() {
-
         RequestQuery epcis = new RequestQuery(getApplicationContext(), new OnEventListener<String>() {
             @Override
             public void onSuccess(String result) {
-                Log.d(TAG, "query result = " + result);
+                InputStream input;
+
+                try {
+                    input = new ByteArrayInputStream(result.getBytes("utf-8"));
+                    start(input);
+                } catch (Exception e) {
+                }
             }
-            @Override
+
             public void onFailure(Exception e) {
-                Log.i(TAG, "Failted to query from epcis");
+                Log.i("fail", "Failted to query from epcis");
             }
         });
-        epcis.execute();
+        epcis.execute("eventCountLimit=1&MATCH_epc=urn:epc:id:sgtin:0614141.112345.12345");
     }
 
-    private void updateEvent(String event) {
-        RequestCapture epcis = new RequestCapture();
 
-        String eventDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format((System.currentTimeMillis()));
-        String eventTime = new java.text.SimpleDateFormat("HH:mm:ss").format((System.currentTimeMillis()));
-
-        Log.d(TAG, "updateEvent");
-
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-                "<!DOCTYPE project>\n" +
-                "<epcis:EPCISDocument xmlns:epcis=\"urn:epcglobal:epcis:xsd:1\" \n" +
-                "                     schemaVersion=\"1.2\" creationDate=\"2016-11-13T11:30:47.0Z\">\n" +
-                "  <EPCISBody>\n" +
-                "    <EventList>\n" +
-                "      <ObjectEvent>\n" +
-                "        <!-- When -->\n" +
-                "        <eventTime>" + eventDate + "T" + eventTime + ".116-10:00</eventTime>\n" +
-                "        <eventTimeZoneOffset>-10:00</eventTimeZoneOffset>\n" +
-                "        <!-- When! -->\n" +
-                "\n" +
-                "        <!--  What -->\n" +
-                "        <epcList>\n" +
-                "          <epc>urn:epc:id:sgtin:0614141.112345.12345</epc>\n" +
-                "        </epcList>\n" +
-                "        <!-- What!-->\n" +
-                "\n" +
-                "        <!-- Add, Observe, Delete -->\n" +
-                "        <action>ADD</action>\n" +
-                "\n" +
-                "        <!-- Why -->\n" +
-                "        <bizStep>urn:epcglobal:cbv:bizstep:"+ event +"</bizStep>\n" +
-                "        <disposition>urn:epcglobal:cbv:disp:user_accessible</disposition>\n" +
-                "        <!-- Why! -->\n" +
-                "\n" +
-                "        <!-- Where -->\n" +
-                "        <bizLocation>\n" +
-                "          <id>urn:epc:id:sgln:7654321.54321.1234</id>\n" +
-                "          <extension>\n" +
-                "            <geo>" + locationX + "," + locationY + "</geo>\n" +
-                "          </extension>\n" +
-                "        </bizLocation>\n" +
-                "        <!-- Where! -->\n" +
-                "      </ObjectEvent>\n" +
-                "    </EventList>\n" +
-                "  </EPCISBody>\n" +
-                "</epcis:EPCISDocument>";
-        epcis.execute(xml);
-    }
     /**
      * Requests location updates from the FusedLocationApi.
      */
@@ -323,26 +335,46 @@ public class CustomerActivity extends Activity implements
             Log.d(TAG, "Start Location update");
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         } else {
-            Toast.makeText(this,"Location Unavialable",Toast.LENGTH_LONG).show();
+            Toast.makeText(this,"Location Unavailable",Toast.LENGTH_LONG).show();
         }
     }
 
+    /**마커 GPS 좌표 **/
+    private void updateMarkerPosition() {
+        ambulance01 = new LatLng(ambulanceLocationX , ambulanceLocationY);
+        ambulance02 = new LatLng(37.484565, 127.033963);
+        myCar = new LatLng(locationX, locationY);
+        accidentLocation = new LatLng(37.490678, 127.048493);
+
+        addMarkersToMap();
+    }
 
     /**마커**/
+    private void addMarkersToMap() {
 
-    private void getSampleMarkerItems(){                                    //마커 표시할 부분
-        ambulance = new ArrayList();
-        //매봉역
-        ambulance.add(new MarkerItem(37.48372341039549 , 127.04207226634026, "응급차"));
-//        ambulance.add(new MarkerItem(locationX, locationY, "현재위치"));
-        for (MarkerItem markerItem : ambulance) {
-            addMarker(markerItem, false);
-        }
-    }
-    private void setCustomMarkerView() {
+        mAmbulance01 = googleMap.addMarker(new MarkerOptions()
+                .position(ambulance01)
+                .title("응급차1")
+                //.snippet("Population: 2,074,200")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
 
-        marker_root_view = LayoutInflater.from(this).inflate(R.layout.marker_layout, null);
-        tv_marker = (TextView) marker_root_view.findViewById(R.id.tv_marker);
+        mAmbulance02 = googleMap.addMarker(new MarkerOptions()
+                .position(ambulance02)
+                .title("응급차2")
+                //.snippet("Population: 4,627,300")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
+
+        mMyCar=  googleMap.addMarker(new MarkerOptions()
+                .position(myCar)
+                .title("내차")
+                //.snippet("Population: 4,627,300")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
+
+        mAccidentLocation = googleMap.addMarker(new MarkerOptions()
+                .position(accidentLocation)
+                .title("사고지점")
+                //.snippet("Population: 4,137,400")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.warning)));
     }
 
 
@@ -370,10 +402,7 @@ public class CustomerActivity extends Activity implements
 
 
         return googleMap.addMarker(markerOptions);
-
     }
-
-
 
     // View를 Bitmap으로 변환
     private Bitmap createDrawableFromView(Context context, View view) {

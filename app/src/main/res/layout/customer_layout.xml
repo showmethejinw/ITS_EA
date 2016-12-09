@@ -10,6 +10,28 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.jang.its_ea.CustomerActivity">
 
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:gravity="center"
+        >
+        <TableRow
+            android:layout_height="fill_parent"
+            android:layout_width="fill_parent"
+            >
+            <ImageView
+                android:id="@+id/emergency"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="3.5"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="이동 경로로 구급차가 접근 중입니다.\n 길을 양보해주세요."
+                android:textColor="#FFFF4444"
+                android:layout_weight="3.5"/>
+        </TableRow>
+    </TableLayout>
 
     <fragment
         android:id="@+id/map"
