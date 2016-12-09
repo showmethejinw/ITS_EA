@@ -1,10 +1,12 @@
 package com.example.jang.its_ea.helper;
 
+import java.io.Serializable;
+
 /**
  * Created by luvsword on 2016-12-03.
  */
 
-public class AccidentInfo {
+public class AccidentInfo implements Serializable{
 
     private String accidentType;
     private String address;
@@ -13,7 +15,52 @@ public class AccidentInfo {
     private String name;
     private String phoneNumber;
     private String hospitalAddress;
+    private int count;
+    private double addressLat;
+    private double addressLon;
+    private double hospitalLat;
 
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public double getAddressLat() {
+        return addressLat;
+    }
+
+    public void setAddressLat(double addressLat) {
+        this.addressLat = addressLat;
+    }
+
+    public double getAddressLon() {
+        return addressLon;
+    }
+
+    public void setAddressLon(double addressLon) {
+        this.addressLon = addressLon;
+    }
+
+    public double getHospitalLat() {
+        return hospitalLat;
+    }
+
+    public void setHospitalLat(double hospitalLat) {
+        this.hospitalLat = hospitalLat;
+    }
+
+    public double getHospitalLon() {
+        return hospitalLon;
+    }
+
+    public void setHospitalLon(double hospitalLon) {
+        this.hospitalLon = hospitalLon;
+    }
+
+    private double hospitalLon;
     public AccidentInfo()
     {
 

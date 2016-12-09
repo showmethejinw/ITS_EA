@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.jang.its_ea">
 
-    <permission
-        android:name="com.tistory.webnautes.googlemap.locationapi.maps.permission.MAPS_RECEIVE"
-        android:protectionLevel="signature" />
+    <!--<permission-->
+        <!--android:name="com.tistory.webnautes.googlemap.locationapi.maps.permission.MAPS_RECEIVE"-->
+        <!--android:protectionLevel="signature" />-->
 
     <uses-permission android:name="com.tistory.webnautes.googlemap.locationapi.maps.permission.MAPS_RECEIVE" />
     <uses-permission android:name="android.permission.INTERNET" />

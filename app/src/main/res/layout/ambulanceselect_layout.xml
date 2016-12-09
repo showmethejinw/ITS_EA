@@ -8,40 +8,19 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/tv_status"
-        android:text="출동중"
-        android:textSize="20pt"
+        android:text="상세 정보"
+        android:textSize="15pt"
         android:background="#000000"
         android:textColor="#FFFFFF"
         android:gravity="center"
         android:layout_gravity="center"
         android:layout_weight="1"/>
-    <Button
-        android:id="@+id/btn_ready"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1"
-        android:text="준비"
-        android:textSize="30pt"/>
 
-    <Button
-        android:id="@+id/btn_waiting"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1"
-        android:text="대기"
-        android:textSize="30pt"/>
-    <Button
-        android:id="@+id/btn_transfer"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1"
-        android:text="이송"
-        android:textSize="30pt"/>
     <Button
         android:id="@+id/btn_return"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="1"
+        android:layout_weight="3"
         android:text="복귀"
         android:textSize="30pt"/>
 

@@ -15,7 +15,21 @@
         />
     <ListView
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="310dp"
         android:id="@+id/listview"
-        android:layout_below="@id/first"/>
+        android:layout_below="@id/first" />
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_standby"
+        android:text="대기"
+        android:textSize="20pt"
+        android:layout_weight="1"/>
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_prepare"
+        android:text="준비"
+        android:textSize="20pt"
+        android:layout_weight="1"/>
 </LinearLayout>

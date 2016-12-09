@@ -8,10 +8,9 @@ package com.example.jang.its_ea;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.location.Geocoder;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -56,6 +55,7 @@ public class ControlCenterActivity extends AppCompatActivity {
 
     private AccidentInfo accidentInfo;
     private  TabHost tab_host;
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -157,11 +157,9 @@ public class ControlCenterActivity extends AppCompatActivity {
                             "\n" +
                             "        <!-- Add, Observe, Delete -->\n" +
                             "        <action>ADD</action>\n" +
-//                            "        <example:1>\n" +
-//                            "            <extension>ADD</extension>\n" +
-//                            "           <extension>ADD</extension>\n" +
-//                            "        </example:1>\n" +
                             "        <!-- Where!  address, age, symptom, name, phonenumber, hostpital; -->\n" +
+                            "        <!-- 할당 되지 않음 : 0  / 할당 됨 : 1-->\n" +
+                            "        <accident:assign>" + 0 + "</accident:assign>\n" +
                             "        <accident:address>" + accidentInfo.getAddress()+ "</accident:address>\n" +
                             "        <accident:address_lat>" + patient_lat + "</accident:address_lat>\n" +
                             "        <accident:address_lon>" + patient_lon + "</accident:address_lon>\n" +
@@ -173,8 +171,7 @@ public class ControlCenterActivity extends AppCompatActivity {
                             "        <accident:hostpital_lat>" + hospital_lat+ "</accident:hostpital_lat>\n" +
                             "        <accident:hostpital_lon>" + hospital_lon+ "</accident:hostpital_lon>\n" +
                             "        <accident:type>" + accidentInfo.getAccidentType()+ "</accident:type>\n" +
-                            "        <!-- 할당 되지 않음 : 0  / 할당 됨 : 1-->\n" +
-                            "        <accident:assign>" + 0 + "</accident:assign>\n" +
+
                             "      </ObjectEvent>\n" +
                             "    </EventList>\n" +
                             "  </EPCISBody>\n" +
@@ -200,6 +197,7 @@ public class ControlCenterActivity extends AppCompatActivity {
 
 
             }
+
         });
 
 
@@ -209,6 +207,7 @@ public class ControlCenterActivity extends AppCompatActivity {
                 Log.d("testing tab", tabId);
                 if(tabId.equals("tab2"))
                 {
+                    adapter.clear();
                     queryEvent();
 
                 }
@@ -251,10 +250,7 @@ public class ControlCenterActivity extends AppCompatActivity {
                         });
                 AlertDialog alert = alert_confirm.create();
                 alert.show();
-
             }
-
-
         });
 
     }
