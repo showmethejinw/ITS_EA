@@ -26,7 +26,19 @@ import android.widget.Toast;
 import com.example.jang.its_ea.helper.AccidentInfo;
 import com.example.jang.its_ea.helper.IconTextItem;
 import com.example.jang.its_ea.helper.IconTextListAdapter;
+import com.example.jang.its_ea.helper.OnEventListener;
 import com.example.jang.its_ea.helper.RequestCapture;
+import com.example.jang.its_ea.helper.RequestQuery;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 public class ControlCenterActivity extends AppCompatActivity {
 
@@ -43,7 +55,7 @@ public class ControlCenterActivity extends AppCompatActivity {
     private IconTextListAdapter adapter;
 
     private AccidentInfo accidentInfo;
-
+    private  TabHost tab_host;
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -83,7 +95,7 @@ public class ControlCenterActivity extends AppCompatActivity {
                 else        //  등록할 수 있음
                 {
                     String address, age, symptom, name, phonenumber, hostpital;
-                    double patient_lat, patient_lon, hospital_lat, hospital_lon;
+                    double patient_lat = 0, patient_lon = 0, hospital_lat = 0, hospital_lon = 0;
 
 
                     address = et_address.getText().toString();
@@ -105,6 +117,21 @@ public class ControlCenterActivity extends AppCompatActivity {
 
                     String eventDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format((System.currentTimeMillis()));
                     String eventTime = new java.text.SimpleDateFormat("HH:mm:ss").format((System.currentTimeMillis()));
+
+                    try {
+                        /**환자 주소, 이송할 병원 좌표 계산**/
+                        patient_lat =  geocoder.getFromLocationName(address, 1).get(0).getLatitude();
+                        patient_lon =  geocoder.getFromLocationName(address, 1).get(0).getLongitude();
+                        hospital_lat = geocoder.getFromLocationName(hostpital, 1).get(0).getLatitude();
+                        hospital_lon = geocoder.getFromLocationName(hostpital, 1).get(0).getLongitude();
+
+//                        Toast.makeText(getApplicationContext(), String.valueOf(lat) + ", " + String.valueOf(lon),Toast.LENGTH_SHORT).show();
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+
 
                     RequestCapture epcis = new RequestCapture();
 
@@ -130,13 +157,24 @@ public class ControlCenterActivity extends AppCompatActivity {
                             "\n" +
                             "        <!-- Add, Observe, Delete -->\n" +
                             "        <action>ADD</action>\n" +
+//                            "        <example:1>\n" +
+//                            "            <extension>ADD</extension>\n" +
+//                            "           <extension>ADD</extension>\n" +
+//                            "        </example:1>\n" +
                             "        <!-- Where!  address, age, symptom, name, phonenumber, hostpital; -->\n" +
-                            "            <accident:age>" + accidentInfo.getAge()+ "</accident:age>\n" +
-                            "            <accident:symptom>" + accidentInfo.getSymptom()+ "</accident:symptom>\n" +
-                            "            <accident:name>" + accidentInfo.getName()+ "</accident:name>\n" +
-                            "            <accident:phonenumber>" + accidentInfo.getPhoneNumber()+ "</accident:phonenumber>\n" +
-                            "            <accident:hostpital>" + accidentInfo.getHospitalAddress()+ "</accident:hostpital>\n" +
-                            "            <accident:type>" + accidentInfo.getAccidentType()+ "</accident:type>\n" +
+                            "        <accident:address>" + accidentInfo.getAddress()+ "</accident:address>\n" +
+                            "        <accident:address_lat>" + patient_lat + "</accident:address_lat>\n" +
+                            "        <accident:address_lon>" + patient_lon + "</accident:address_lon>\n" +
+                            "        <accident:age>" + accidentInfo.getAge()+ "</accident:age>\n" +
+                            "        <accident:symptom>" + accidentInfo.getSymptom()+ "</accident:symptom>\n" +
+                            "        <accident:name>" + accidentInfo.getName()+ "</accident:name>\n" +
+                            "        <accident:phonenumber>" + accidentInfo.getPhoneNumber()+ "</accident:phonenumber>\n" +
+                            "        <accident:hostpital>" + accidentInfo.getHospitalAddress()+ "</accident:hostpital>\n" +
+                            "        <accident:hostpital_lat>" + hospital_lat+ "</accident:hostpital_lat>\n" +
+                            "        <accident:hostpital_lon>" + hospital_lon+ "</accident:hostpital_lon>\n" +
+                            "        <accident:type>" + accidentInfo.getAccidentType()+ "</accident:type>\n" +
+                            "        <!-- 할당 되지 않음 : 0  / 할당 됨 : 1-->\n" +
+                            "        <accident:assign>" + 0 + "</accident:assign>\n" +
                             "      </ObjectEvent>\n" +
                             "    </EventList>\n" +
                             "  </EPCISBody>\n" +
@@ -144,34 +182,43 @@ public class ControlCenterActivity extends AppCompatActivity {
                     Log.d("xml___",xml);
                     epcis.execute(xml);
 
-                    try {
-                        /**환자 주소, 이송할 병원 좌표 계산**/
-                        patient_lat =  geocoder.getFromLocationName(address, 1).get(0).getLatitude();
-                        patient_lon =  geocoder.getFromLocationName(address, 1).get(0).getLongitude();
-                        hospital_lat = geocoder.getFromLocationName(hostpital, 1).get(0).getLatitude();
-                        hospital_lon = geocoder.getFromLocationName(hostpital, 1).get(0).getLongitude();
-
-//                        Toast.makeText(getApplicationContext(), String.valueOf(lat) + ", " + String.valueOf(lon),Toast.LENGTH_SHORT).show();
-                    }
-                    catch (Exception e)
-                    {
-
-                    }
 
                     //전송
 
+                    Toast.makeText(ControlCenterActivity.this, "사고 접수 완료!", Toast.LENGTH_SHORT).show();
+                    tab_host.setCurrentTab(1);
+
+                    et_address.setText("");
+                    et_age.setText("");
+                    et_symptom.setText("");
+                    et_name.setText("");
+                    et_phonenumber.setText("");
+                    et_hospitaladdress.setText("");
+
                 }
+
 
 
             }
         });
 
 
+        tab_host.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+            @Override
+            public void onTabChanged(String tabId) {
+                Log.d("testing tab", tabId);
+                if(tabId.equals("tab2"))
+                {
+                    queryEvent();
+
+                }
+            }
+        });
 
 
-        adapter.addItem(new IconTextItem("1. 서울시 송파구 송파동 - 출동중"));
-        adapter.addItem(new IconTextItem("2. 서울시 강남구 도곡동 - 출동 준비 중"));
-        listview.setAdapter(adapter);
+//        adapter.addItem(new IconTextItem("1. 서울시 송파구 송파동 - 출동중"));
+//        adapter.addItem(new IconTextItem("2. 서울시 강남구 도곡동 - 출동 준비 중"));
+//        listview.setAdapter(adapter);
 //        listview.setBackgroundColor(Color.rgb(25,25,25));
 
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -215,7 +262,7 @@ public class ControlCenterActivity extends AppCompatActivity {
     public void init()
     {
 
-        TabHost tab_host = (TabHost) findViewById(R.id.tabhost);
+        tab_host = (TabHost) findViewById(R.id.tabhost);
         tab_host.setup();
 
         TabHost.TabSpec ts1 = tab_host.newTabSpec("tab1");
@@ -253,8 +300,72 @@ public class ControlCenterActivity extends AppCompatActivity {
 
         listview = (ListView) findViewById(R.id.listview);
         adapter = new IconTextListAdapter(this);
+//
+//        listview.setAdapter(adapter);
 
-        listview.setAdapter(adapter);
+    }
 
+    private Document parseXML(InputStream stream) throws Exception{
+
+        DocumentBuilderFactory objDocumentBuilderFactory = null;
+        DocumentBuilder objDocumentBuilder = null;
+        Document doc = null;
+
+        try{
+
+            objDocumentBuilderFactory = DocumentBuilderFactory.newInstance();
+            objDocumentBuilder = objDocumentBuilderFactory.newDocumentBuilder();
+
+            doc = objDocumentBuilder.parse(stream);
+
+        }catch(Exception ex){
+            throw ex;
+        }
+
+        return doc;
+    }
+
+    private void start(InputStream input) throws Exception{
+        Document doc = parseXML(input);
+        NodeList descNodes = doc.getElementsByTagName("ObjectEvent");
+
+
+        for(int i=0; i<descNodes.getLength();i++){
+
+            for(Node node = descNodes.item(i).getFirstChild(); node!=null; node=node.getNextSibling()){ //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
+
+                if(node.getNodeName().equals("accident:address")){
+
+
+                    adapter.addItem(new IconTextItem(node.getTextContent()));
+                    listview.setAdapter(adapter);
+
+                    Log.d("result_", node.getTextContent());      //결과값
+                }
+            }
+
+        }
+    }
+
+
+    private void queryEvent() {
+
+        RequestQuery epcis = new RequestQuery(getApplicationContext(), new OnEventListener<String>() {
+            @Override
+            public void onSuccess(String result) {
+                InputStream input;
+
+                try {
+                    input = new ByteArrayInputStream(result.getBytes("utf-8"));
+                    start(input);
+                }catch (Exception e)
+                {
+                }
+            }
+            public void onFailure(Exception e) {
+                Log.i("fail", "Failted to query from epcis");
+            }
+        });
+        epcis.execute();
     }
 }

@@ -69,7 +69,8 @@
                                 android:id="@+id/et_address"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="3.5"/>
+                                android:layout_weight="3.5"
+                                android:text="서울시 강남구 삼성1동"/>
 
                         </TableRow>
 
@@ -88,7 +89,8 @@
                                 android:id="@+id/et_symptom"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="3.5"/>
+                                android:layout_weight="3.5"
+                                android:text="복통"/>
 
                         </TableRow>
 
@@ -107,7 +109,8 @@
                                 android:id="@+id/et_age"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="3.5"/>
+                                android:layout_weight="3.5"
+                                android:text="99"/>
 
                         </TableRow>
                         <TableRow
@@ -125,7 +128,8 @@
                                 android:id="@+id/et_name"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="3.5"/>
+                                android:layout_weight="3.5"
+                                android:text="서장훈"/>
 
                         </TableRow>
 
@@ -144,7 +148,8 @@
                                 android:id="@+id/et_phonenumber"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="3.5"/>
+                                android:layout_weight="3.5"
+                                android:text="01041457899"/>
 
                         </TableRow>
 
@@ -163,7 +168,8 @@
                                 android:id="@+id/et_hospitaladdress"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="3.5"/>
+                                android:layout_weight="3.5"
+                                android:text="서울 강남구 일원로 81 삼성의료원"/>
 
                         </TableRow>
 

@@ -44,7 +44,7 @@ public class AmbulanceActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        listview.setAdapter(adapter);
+//        listview.setAdapter(adapter);
     }
 
     @Override
@@ -55,11 +55,11 @@ public class AmbulanceActivity extends AppCompatActivity {
         init();
 
 
-        adapter.addItem(new IconTextItem("1. 서울시 송파구 송파동"));
-        adapter.addItem(new IconTextItem("2. 서울시 강남구 도곡동"));
-        listview.setAdapter(adapter);
+//        adapter.addItem(new IconTextItem("1. 서울시 송파구 송파동"));
+//        adapter.addItem(new IconTextItem("2. 서울시 강남구 도곡동"));
+//        listview.setAdapter(adapter);
 
-
+        queryEvent();
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -73,7 +73,7 @@ public class AmbulanceActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
 
 
-                                queryEvent();
+//                                queryEvent();
                                 Toast.makeText(getApplicationContext(), "출동 할당 완료", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(getApplicationContext(), AmbulanceSelectActivity.class);
                                 startActivity(intent);
@@ -129,8 +129,13 @@ public class AmbulanceActivity extends AppCompatActivity {
 
             for(Node node = descNodes.item(i).getFirstChild(); node!=null; node=node.getNextSibling()){ //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
 
-                if(node.getNodeName().equals("eventTime")){
-                    Log.d(TAG, node.getTextContent());      //결과값
+                if(node.getNodeName().equals("accident:address")){
+
+
+                    adapter.addItem(new IconTextItem(node.getTextContent()));
+                    listview.setAdapter(adapter);
+
+                    Log.d("result_", node.getTextContent());      //결과값
                 }
             }
 
@@ -152,7 +157,7 @@ public class AmbulanceActivity extends AppCompatActivity {
                 }
             }
             public void onFailure(Exception e) {
-                Log.i(TAG, "Failted to query from epcis");
+                Log.i("fail", "Failted to query from epcis");
             }
         });
         epcis.execute();
@@ -162,7 +167,7 @@ public class AmbulanceActivity extends AppCompatActivity {
         listview = (ListView) findViewById(R.id.listview);
         adapter = new IconTextListAdapter(this);
 
-        listview.setAdapter(adapter);
+//        listview.setAdapter(adapter);
         accidentInfo = new AccidentInfo();
 
     }
