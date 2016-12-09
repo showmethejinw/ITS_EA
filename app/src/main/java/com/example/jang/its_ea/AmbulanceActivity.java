@@ -231,7 +231,7 @@ public class AmbulanceActivity extends AppCompatActivity {
                 Log.i("fail", "Failted to query from epcis");
             }
         });
-        epcis.execute();
+        epcis.execute("");
     }
 
     public void init() {

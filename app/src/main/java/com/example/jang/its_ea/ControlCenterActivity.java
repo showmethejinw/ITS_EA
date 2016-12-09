@@ -56,6 +56,8 @@ public class ControlCenterActivity extends AppCompatActivity {
 
     private AccidentInfo accidentInfo;
     private  TabHost tab_host;
+    private AccidentInfo [] accidentInfoList;
+    private int number;
 
     @Override
     public void onBackPressed() {
@@ -114,7 +116,8 @@ public class ControlCenterActivity extends AppCompatActivity {
                     accidentInfo.setName(name);
                     accidentInfo.setPhoneNumber(phonenumber);
                     accidentInfo.setHospitalAddress(hostpital);
-
+                    accidentInfo.setStatus("opening");
+                    accidentInfo.setGdtiId("0614141.06012.1234");
 
                     String eventDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format((System.currentTimeMillis()));
                     String eventTime = new java.text.SimpleDateFormat("HH:mm:ss").format((System.currentTimeMillis()));
@@ -158,11 +161,7 @@ public class ControlCenterActivity extends AppCompatActivity {
                             "\n" +
                             "        <!-- Add, Observe, Delete -->\n" +
                             "        <action>ADD</action>\n" +
-//                            "        <example:1>\n" +
-//                            "            <extension>ADD</extension>\n" +
-//                            "           <extension>ADD</extension>\n" +
-//                            "        </example:1>\n" +
-
+                            "        <!-- Why -->\n" +
                             "        <bizStep>urn:epcglobal:cbv:bizstep:"+ accidentInfo.getStatus() +"</bizStep>\n" +
                             "        <disposition>urn:epcglobal:cbv:disp:registered</disposition>\n" +
                             "        <!-- Where!  address, age, symptom, name, phonenumber, hostpital; -->\n" +
@@ -234,6 +233,7 @@ public class ControlCenterActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {          //리스트 뷰에서 리스트 중 하나를 클릭 했을 때발생
                 IconTextItem curItem = (IconTextItem) adapter.getItem(position);
                 final String[] curData = curItem.getData();
+                number = position;
                 AlertDialog.Builder alert_confirm = new AlertDialog.Builder(ControlCenterActivity.this);
                 alert_confirm.setMessage("상세 정보 확인").setCancelable(false).setPositiveButton("확인",     //팝업 작동
                         new DialogInterface.OnClickListener() {
@@ -243,6 +243,7 @@ public class ControlCenterActivity extends AppCompatActivity {
 
 //                                Toast.makeText(getApplicationContext(), "출동 할당 완료", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(getApplicationContext(), DetailInformationActivity.class);
+                                intent.putExtra("gdti", accidentInfoList[number].getGdtiId());
                                 startActivity(intent);
                                 finish();
 
@@ -332,19 +333,53 @@ public class ControlCenterActivity extends AppCompatActivity {
     private void start(InputStream input) throws Exception{
         Document doc = parseXML(input);
         NodeList descNodes = doc.getElementsByTagName("ObjectEvent");
+        accidentInfoList = new AccidentInfo[descNodes.getLength()];
 
 
         for(int i=0; i<descNodes.getLength();i++){
+            accidentInfoList[i] = new AccidentInfo();
 
             for(Node node = descNodes.item(i).getFirstChild(); node!=null; node=node.getNextSibling()){ //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
 
                 if(node.getNodeName().equals("accident:address")){
 
-
+                    accidentInfoList[i].setAddress(node.getTextContent());
                     adapter.addItem(new IconTextItem(node.getTextContent()));
                     listview.setAdapter(adapter);
 
                     Log.d("result_", node.getTextContent());      //결과값
+                }
+                else if(node.getNodeName().equals("accident:age"))
+                {
+                    accidentInfoList[i].setAge(node.getTextContent());
+                }
+                else if(node.getNodeName().equals("accident:symptom"))
+                {
+                    accidentInfoList[i].setSymptom(node.getTextContent());
+                }
+                else if(node.getNodeName().equals("accident:name"))
+                {
+                    accidentInfoList[i].setName(node.getTextContent());
+                }
+                else if(node.getNodeName().equals("accident:phonenumber"))
+                {
+                    accidentInfoList[i].setPhoneNumber(node.getTextContent());
+                }
+                else if(node.getNodeName().equals("accident:hostpital"))
+                {
+                    accidentInfoList[i].setHospitalAddress(node.getTextContent());
+//                    accidentInfoList[i].setCount(descNodes.getLength());
+                }
+                else if(node.getNodeName().equals("accident:type"))
+                {
+                    accidentInfoList[i].setAccidentType(node.getTextContent());
+                }
+                else if(node.getNodeName().equals("epcList")) {
+//                    Node tempNode = node.getFirstChild();
+//                    if (tempNode.getNodeName().equals("epc"))
+//                    Log.d("EPC", tempId);
+//                    accidentInfoList[i].setGdtiId(tempId);
+                     accidentInfoList[i].setGdtiId(node.getTextContent().replace(" ", "").split(":")[4]);
                 }
             }
 
@@ -354,6 +389,7 @@ public class ControlCenterActivity extends AppCompatActivity {
 
     private void queryEvent() {
 
+        Log.d("queryEvent", "queryEvent");
         RequestQuery epcis = new RequestQuery(getApplicationContext(), new OnEventListener<String>() {
             @Override
             public void onSuccess(String result) {
@@ -370,6 +406,6 @@ public class ControlCenterActivity extends AppCompatActivity {
                 Log.i("fail", "Failted to query from epcis");
             }
         });
-        epcis.execute();
+        epcis.execute("");
     }
 }

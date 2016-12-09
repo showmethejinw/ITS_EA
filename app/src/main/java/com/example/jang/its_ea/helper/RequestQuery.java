@@ -28,8 +28,6 @@ public class RequestQuery  extends AsyncTask<String, Void, String> {
     private Exception mException;
     private OnEventListener<String>  mCallback;
 
-    private static String var1 = "TEST";
-
     public RequestQuery(Context context, OnEventListener callback) {
         mCallback = callback;
         mContext = context;
@@ -38,10 +36,13 @@ public class RequestQuery  extends AsyncTask<String, Void, String> {
     protected String doInBackground(String... params) {
 
         try {
-            //String url = params[0];
-//            String url = "http://125.131.73.79:4003/epcis/Service/Poll/SimpleEventQuery?eventCountLimit=1&GE_eventTime=2016-12-04T08:50:44.116Z&";
+            String query = url;
+            if (!params[0].isEmpty())
+                query = query + "?" + params[0];
+
+            Log.d(TAG, "query = " + query);
             Request request = new Request.Builder()
-                    .url(url)
+                    .url(query)
                     .get()
                     .build();
             Response response = client.newCall(request).execute();

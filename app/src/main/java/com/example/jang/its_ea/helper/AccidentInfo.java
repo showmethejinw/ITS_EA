@@ -20,14 +20,7 @@ public class AccidentInfo implements Serializable{
     private double addressLon;
     private double hospitalLat;
     private String status;
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    private String gdtiId;
 
     public int getCount() {
         return count;
@@ -114,6 +107,14 @@ public class AccidentInfo implements Serializable{
         this.hospitalAddress = hospitalAddress;
     }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setGdtiId(String id) {
+        this.gdtiId = id;
+    }
+
     public String getAccidentType() {
         return accidentType;
     }
@@ -140,5 +141,13 @@ public class AccidentInfo implements Serializable{
 
     public String getHospitalAddress() {
         return hospitalAddress;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getGdtiId() {
+        return gdtiId;
     }
 }
