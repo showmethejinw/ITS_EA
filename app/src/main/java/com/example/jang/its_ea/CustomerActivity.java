@@ -75,6 +75,9 @@ public class CustomerActivity extends Activity implements
     private double locationX;
     private double locationY;
 
+    private static final String SGTIN1 = "urn:epc:id:sgtin:4012345.077889.25";
+    private static final String SGTIN2 = "urn:epc:id:sgtin:4012345.077889.26";
+
     private double ambulanceLocationX, ambulanceLocationY;
     private String nodeValueArray[];
 
@@ -310,7 +313,7 @@ public class CustomerActivity extends Activity implements
                 Log.i("fail", "Failted to query from epcis");
             }
         });
-        epcis.execute("eventCountLimit=1&MATCH_epc=urn:epc:id:sgtin:0614141.112345.12345");
+        epcis.execute("eventCountLimit=1&MATCH_epc=" + SGTIN1);
     }
 
 
