@@ -7,6 +7,8 @@ package com.example.jang.its_ea;
 import android.app.Activity;
 import android.content.Intent;
 import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -19,7 +21,7 @@ import com.example.jang.its_ea.helper.RequestCapture;
 
 import org.w3c.dom.Text;
 
-public class AmbulanceSelectActivity extends Activity {
+public class AmbulanceSelectActivity extends Activity implements LocationListener{
 
     private Button btn_ready, btn_waiting,btn_transfer, btn_return;
     private TextView tv_status;
@@ -117,7 +119,11 @@ public class AmbulanceSelectActivity extends Activity {
 //                            "            <extension>ADD</extension>\n" +
 //                            "           <extension>ADD</extension>\n" +
 //                            "        </example:1>\n" +
+                "        <bizStep>urn:epcglobal:cbv:bizstep:" +"</bizStep>\n" +
+                "        <disposition>urn:epcglobal:cbv:disp:registered</disposition>\n" +
                 "        <!-- Where!  address, age, symptom, name, phonenumber, hostpital; -->\n" +
+                "        <!-- 할당 되지 않음 : 0  / 할당 됨 : 1-->\n" +
+                "        <accident:assign>" + 1 + "</accident:assign>\n" +
                 "        <accident:address>" + accidentInfo.getAddress()+ "</accident:address>\n" +
                 "        <accident:address_lat>" + patient_lat + "</accident:address_lat>\n" +
                 "        <accident:address_lon>" + patient_lon + "</accident:address_lon>\n" +
@@ -129,8 +135,7 @@ public class AmbulanceSelectActivity extends Activity {
                 "        <accident:hostpital_lat>" + hospital_lat+ "</accident:hostpital_lat>\n" +
                 "        <accident:hostpital_lon>" + hospital_lon+ "</accident:hostpital_lon>\n" +
                 "        <accident:type>" + accidentInfo.getAccidentType()+ "</accident:type>\n" +
-                "        <!-- 할당 되지 않음 : 0  / 할당 됨 : 1-->\n" +
-                "        <accident:assign>" + 1 + "</accident:assign>\n" +
+
                 "      </ObjectEvent>\n" +
                 "    </EventList>\n" +
                 "  </EPCISBody>\n" +
@@ -157,5 +162,25 @@ public class AmbulanceSelectActivity extends Activity {
         {
 
         }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
     }
 }

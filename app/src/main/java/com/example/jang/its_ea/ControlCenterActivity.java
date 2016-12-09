@@ -8,9 +8,10 @@ package com.example.jang.its_ea;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Geocoder;
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -157,6 +158,13 @@ public class ControlCenterActivity extends AppCompatActivity {
                             "\n" +
                             "        <!-- Add, Observe, Delete -->\n" +
                             "        <action>ADD</action>\n" +
+//                            "        <example:1>\n" +
+//                            "            <extension>ADD</extension>\n" +
+//                            "           <extension>ADD</extension>\n" +
+//                            "        </example:1>\n" +
+
+                            "        <bizStep>urn:epcglobal:cbv:bizstep:"+ accidentInfo.getStatus() +"</bizStep>\n" +
+                            "        <disposition>urn:epcglobal:cbv:disp:registered</disposition>\n" +
                             "        <!-- Where!  address, age, symptom, name, phonenumber, hostpital; -->\n" +
                             "        <!-- 할당 되지 않음 : 0  / 할당 됨 : 1-->\n" +
                             "        <accident:assign>" + 0 + "</accident:assign>\n" +

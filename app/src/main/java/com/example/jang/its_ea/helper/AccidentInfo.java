@@ -19,6 +19,15 @@ public class AccidentInfo implements Serializable{
     private double addressLat;
     private double addressLon;
     private double hospitalLat;
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public int getCount() {
         return count;

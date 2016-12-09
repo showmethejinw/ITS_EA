@@ -166,7 +166,15 @@ public class AmbulanceActivity extends AppCompatActivity {
             accidentInfo[i] = new AccidentInfo();
             for (Node node = descNodes.item(i).getFirstChild(); node != null; node = node.getNextSibling()) { //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
 
-                if(node.getNodeName().equals("accident:address")){
+                /*if(node.getNodeName().equals("accident:assign"))
+                {
+                    if(node.getTextContent().equals("0"))
+                    {
+
+                    }
+
+                }*/
+                if (node.getNodeName().equals("accident:address")) {
 
                     accidentInfo[i].setAddress(node.getTextContent());
                     adapter.addItem(new IconTextItem(node.getTextContent()));
