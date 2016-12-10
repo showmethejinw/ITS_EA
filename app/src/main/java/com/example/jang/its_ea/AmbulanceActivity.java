@@ -127,7 +127,9 @@ public class AmbulanceActivity extends AppCompatActivity {
                 btn_standby.setTextColor(Color.BLACK);
 
                 updateEvent("preparing","inactive");
-
+                /**추가해야 되는가?**/
+                queryEvent();
+                /**추가해야 되는가?**/
             }
         });
 
@@ -255,6 +257,7 @@ public class AmbulanceActivity extends AppCompatActivity {
 
     private void queryEvent() {
 
+        adapter.clear();
         RequestQuery epcis = new RequestQuery(getApplicationContext(), new OnEventListener<String>() {
             @Override
             public void onSuccess(String result) {
