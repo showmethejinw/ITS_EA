@@ -4,6 +4,7 @@ package com.example.jang.its_ea;
  * Created by jang on 2016-12-01.
  */
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +13,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -30,6 +34,9 @@ import android.widget.Toast;
 
 import com.example.jang.its_ea.helper.OnEventListener;
 import com.example.jang.its_ea.helper.RequestQuery;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationAvailability;
@@ -53,7 +60,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -111,8 +121,8 @@ public class CustomerActivity extends Activity implements
     public void onMapReady(final GoogleMap map) {
         googleMap = map;
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -151,11 +161,13 @@ public class CustomerActivity extends Activity implements
         ambulanceLocationX = new double[2];
         ambulanceLocationY = new double[2];
 
+        // ATTENTION: This "addApi(AppIndex.API)"was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
-                .build();
+                .addApi(AppIndex.API).build();
 
         infoImageView = (ImageView) this.findViewById(R.id.list_image);
         locationText = (TextView) this.findViewById(R.id.location);
@@ -168,7 +180,7 @@ public class CustomerActivity extends Activity implements
         infoImageView.setImageResource(R.drawable.car1);
         infoText.setTextColor(Color.BLACK);
         infoText.setText("주행을 시작합니다. 안전 운전 하세요.");
-        locationText.setText("현 지점 : " /*+*/ );
+        locationText.setText("현 지점 : " + getAddress(this, 0, 0));
     }
 
     @Override
@@ -179,8 +191,8 @@ public class CustomerActivity extends Activity implements
         mLocationRequest.setInterval(3000);
         mLocationRequest.setFastestInterval(1500);
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             CheckPermission();
         }
 
@@ -190,36 +202,36 @@ public class CustomerActivity extends Activity implements
 
     private void CheckPermission() {
 
-        int hasWriteContactsPermission = ContextCompat.checkSelfPermission(CustomerActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION);
+        int hasWriteContactsPermission = ContextCompat.checkSelfPermission(CustomerActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION);
 
         if (hasWriteContactsPermission != PackageManager.PERMISSION_GRANTED) {
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(CustomerActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(CustomerActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
 
                 ActivityCompat.requestPermissions(CustomerActivity.this,
-                        new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                         REQUEST_CODE_LOCATION);
 
                 return;
             }
             ActivityCompat.requestPermissions(CustomerActivity.this,
-                    new String[]{android.Manifest.permission.WRITE_CONTACTS},
+                    new String[]{Manifest.permission.WRITE_CONTACTS},
                     REQUEST_CODE_LOCATION);
             return;
         }
 
-        hasWriteContactsPermission = ContextCompat.checkSelfPermission(CustomerActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+        hasWriteContactsPermission = ContextCompat.checkSelfPermission(CustomerActivity.this, Manifest.permission.ACCESS_FINE_LOCATION);
 
         if (hasWriteContactsPermission != PackageManager.PERMISSION_GRANTED) {
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(CustomerActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(CustomerActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
 
                 ActivityCompat.requestPermissions(CustomerActivity.this,
-                        new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         REQUEST_CODE_LOCATION);
 
                 return;
             }
             ActivityCompat.requestPermissions(CustomerActivity.this,
-                    new String[]{android.Manifest.permission.WRITE_CONTACTS},
+                    new String[]{Manifest.permission.WRITE_CONTACTS},
                     REQUEST_CODE_LOCATION);
             return;
         }
@@ -239,11 +251,16 @@ public class CustomerActivity extends Activity implements
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.start(mGoogleApiClient, getIndexApiAction());
     }
 
     @Override
     protected void onStop() {
-        super.onStop();
+        super.onStop();// ATTENTION: This was auto-generated to implement the App Indexing API.
+// See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(mGoogleApiClient, getIndexApiAction());
         if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
@@ -257,11 +274,16 @@ public class CustomerActivity extends Activity implements
 
         Log.d(TAG, "location changed x = " + locationX + ", y = " + locationY);
         googleMap.clear();
-        Marker seoul = googleMap.addMarker(new MarkerOptions().position(CURRENT_LOCATION)
-                .title("사용자 위치"));
+//        Marker seoul = googleMap.addMarker(new MarkerOptions().position(CURRENT_LOCATION)
+//                .title("사용자 위치"));
 
         queryEvent(SGTIN1);
         queryEvent(SGTIN2);
+
+        Log.d(TAG, "SendHandleMsg");
+        sendHandleMsgByDistance(locationX, locationY, ambulanceLocationX[0], ambulanceLocationY[0]);
+        sendHandleMsgByDistance(locationX, locationY, ambulanceLocationX[1], ambulanceLocationY[1]);
+
         updateMarkerPosition();
     }
 
@@ -294,7 +316,7 @@ public class CustomerActivity extends Activity implements
             for (Node node = descNodes.item(i).getFirstChild(); node != null; node = node.getNextSibling()) { //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
 
                 nodeValue[j] = node.getTextContent();
-                Log.d(TAG, "nodeValue [" + j + "]" + nodeValue[j]);  //결과값
+//                Log.d(TAG, "nodeValue [" + j + "]" + nodeValue[j]);  //결과값
                 ++j;
             }
         }
@@ -340,8 +362,8 @@ public class CustomerActivity extends Activity implements
      */
     protected void startLocationUpdates() {
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -362,6 +384,7 @@ public class CustomerActivity extends Activity implements
 
     /**마커 GPS 좌표 **/
     private void updateMarkerPosition() {
+
         ambulance01 = new LatLng(ambulanceLocationX[0] , ambulanceLocationY[0]);
         ambulance02 = new LatLng(ambulanceLocationX[1] , ambulanceLocationY[1]);
         myCar = new LatLng(locationX, locationY);
@@ -369,6 +392,39 @@ public class CustomerActivity extends Activity implements
 
         addMarkersToMap();
         addCircleToMap();
+    }
+
+    public static String getAddress(Context mContext, double lat, double lng) {
+        String nowAddress = "현재 위치를 확인할 수 없습니다.";
+        Geocoder geocoder = new Geocoder(mContext, Locale.KOREA);
+        List<Address> address;
+        try {
+            if (geocoder != null) {
+                address = geocoder.getFromLocation(lat, lng, 1);
+                if (address != null && address.size() > 0) {
+                    String currentLocationAddress = address.get(0).getAddressLine(0).toString();
+                    if(currentLocationAddress != null) {
+                        nowAddress = currentLocationAddress;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            Toast.makeText(mContext, "주소를 가져올 수 없습니다.", Toast.LENGTH_LONG).show();
+        }
+        return nowAddress;
+    }
+
+    private void sendHandleMsgByDistance(double myX1, double myY1, double ambulX2, double ambulY2) {
+        if ((myX1 == 0) || (myY1 == 0) || (ambulX2 == 0) || (ambulY2 == 0))
+            return;
+
+        double dist = distance(myX1, myY1, ambulX2, ambulY2, "meter");
+        Log.d(TAG, "dist : " + dist);
+        if ((0 <= dist) && (dist < 50)) {
+            mMainHandler.obtainMessage(SEND_TO_CHANGE_WARNING_INFO);
+        } else {
+            locationText.setText("현 지점 : " + getAddress(this, myX1, myY1));
+        }
     }
 
     public Bitmap bitmapSizeByScall(Bitmap bitmapIn, float scall_zero_to_one_f) {
@@ -383,7 +439,7 @@ public class CustomerActivity extends Activity implements
     private Bitmap markerIconResToBitmap(int res) {
         Bitmap orgImage =
                 BitmapFactory.decodeResource(getResources(), res);
-        return bitmapSizeByScall(orgImage, 0.5f);
+        return bitmapSizeByScall(orgImage, 0.3f);  // Icon Image Scale
     }
 
     /**마커**/
@@ -489,7 +545,7 @@ public class CustomerActivity extends Activity implements
     }
 
     private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
-
+        Log.d(TAG, "enter to disc function");
         double theta = lon1 - lon2;
         double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
 
@@ -517,6 +573,22 @@ public class CustomerActivity extends Activity implements
         return (rad * 180 / Math.PI);
     }
 
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Customer Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
     // 핸들러 Class
     private class SendMessageHandler extends Handler {
 
@@ -528,6 +600,7 @@ public class CustomerActivity extends Activity implements
                     infoImageView.setImageResource(R.drawable.emergency);
                     infoText.setTextColor(Color.RED);
                     infoText.setText("이동 경로로 구급차가 접근 중입니다. 길을 양보해주세요.");
+                    locationText.setText("사고 지점 : " + getAddress(CustomerActivity.this, 0, 0));
                     break;
                 default:
                     break;

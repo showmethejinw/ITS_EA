@@ -20,7 +20,7 @@
         android:layout_marginRight="5dip"
         android:padding="3dip"
         android:orientation="horizontal">
-        <!--android:background="@color/cast_expanded_controller_background_color"-->
+
         <ImageView
             android:id="@+id/list_image"
             android:layout_width="50dip"
