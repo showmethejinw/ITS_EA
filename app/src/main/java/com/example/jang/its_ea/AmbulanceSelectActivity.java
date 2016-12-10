@@ -224,6 +224,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
 
     private void updateEvent(String event, String event2) {
         RequestCapture epcis = new RequestCapture();
+        RequestCapture epcis2 = new RequestCapture();
 
         String eventDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format((System.currentTimeMillis()));
         String eventTime = new java.text.SimpleDateFormat("HH:mm:ss").format((System.currentTimeMillis()));
@@ -314,7 +315,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
                 "  </EPCISBody>\n" +
                 "</epcis:EPCISDocument>";
         epcis.execute(xml);
-        epcis.equals(xml2);
+        epcis2.execute(xml2);
     }
     /** gps start**/
     @Override

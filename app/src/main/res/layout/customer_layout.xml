@@ -18,14 +18,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_marginRight="5dip"
-        android:background="@color/cast_expanded_controller_background_color"
         android:padding="3dip"
         android:orientation="horizontal">
-
+        <!--android:background="@color/cast_expanded_controller_background_color"-->
         <ImageView
             android:id="@+id/list_image"
             android:layout_width="50dip"
-            android:layout_height="50dip" />
+            android:layout_height="50dip"
+            android:src="@drawable/car1"/>
     </LinearLayout>
 
     <!-- Name of ATM -->

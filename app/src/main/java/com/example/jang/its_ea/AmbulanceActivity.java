@@ -54,7 +54,8 @@ public class AmbulanceActivity extends AppCompatActivity {
 
     private Geocoder geocoder;
 
-    private static final String SGTIN = "urn:epc:id:sgtin:4012345.077889.25";
+    private static final String SGTIN1 = "urn:epc:id:sgtin:4012345.077889.25";
+    private static final String SGTIN2 = "urn:epc:id:sgtin:4012345.077889.26";
 
     @Override
     protected void onResume() {
@@ -69,7 +70,7 @@ public class AmbulanceActivity extends AppCompatActivity {
 
         init();
 
-
+        adapter.clear();
 //        adapter.addItem(new IconTextItem("1. 서울시 송파구 송파동"));
 //        adapter.addItem(new IconTextItem("2. 서울시 강남구 도곡동"));
 //        listview.setAdapter(adapter);
@@ -128,7 +129,7 @@ public class AmbulanceActivity extends AppCompatActivity {
 
                 updateEvent("preparing","inactive");
                 /**추가해야 되는가?**/
-                queryEvent();
+//                queryEvent();
                 /**추가해야 되는가?**/
             }
         });
@@ -145,6 +146,8 @@ public class AmbulanceActivity extends AppCompatActivity {
                 btn_standby.setClickable(false);
                 btn_prepare.setTextColor(Color.BLACK);
                 flag = 0;
+
+                adapter.clear();
 
                 updateEvent("waiting","ready");
                 queryEvent();
@@ -257,7 +260,7 @@ public class AmbulanceActivity extends AppCompatActivity {
 
     private void queryEvent() {
 
-        adapter.clear();
+//        adapter.clear();
         RequestQuery epcis = new RequestQuery(getApplicationContext(), new OnEventListener<String>() {
             @Override
             public void onSuccess(String result) {
@@ -319,7 +322,7 @@ public class AmbulanceActivity extends AppCompatActivity {
                 "\n" +
                 "        <!--  What -->\n" +
                 "        <epcList>\n" +
-                "          <epc> " + SGTIN + "</epc>\n" +
+                "          <epc> " + SGTIN1 + "</epc>\n" +
                 "        </epcList>\n" +
                 "        <!-- What!-->\n" +
                 "\n" +
