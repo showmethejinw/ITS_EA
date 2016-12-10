@@ -14,6 +14,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -22,10 +24,10 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.jang.its_ea.helper.MarkerItem;
 import com.example.jang.its_ea.helper.OnEventListener;
 import com.example.jang.its_ea.helper.RequestQuery;
 import com.google.android.gms.common.ConnectionResult;
@@ -52,7 +54,6 @@ import org.w3c.dom.NodeList;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -83,17 +84,20 @@ public class CustomerActivity extends Activity implements
     private static final String SGTIN1 = "urn:epc:id:sgtin:4012345.077889.25";
     private static final String SGTIN2 = "urn:epc:id:sgtin:4012345.077889.26";
 
-    private double ambulanceLocationX, ambulanceLocationY;
+    private double ambulanceLocationX[], ambulanceLocationY[];
     private String nodeValueArray[];
+
+    private ImageView infoImageView;
+    private TextView infoText, locationText;
 
     private GoogleMap googleMap;
 
-    private ArrayList<MarkerItem> ambulance;        //marker
-    private TextView tv_marker;
-    private View marker_root_view;
     private Marker mAmbulance01, mAmbulance02, mMyCar, mAccidentLocation;
     private LatLng ambulance01, ambulance02, myCar, accidentLocation;
     private Circle mMyCarCircle;
+
+    private static final int SEND_TO_CHANGE_WARNING_INFO = 0;
+    private SendMessageHandler mMainHandler = null;
 
     @Override
     public void onBackPressed() {
@@ -132,7 +136,8 @@ public class CustomerActivity extends Activity implements
 //        setCustomMarkerView();
 //        getSampleMarkerItems();
 
-        queryEvent();
+        queryEvent(SGTIN1);
+        queryEvent(SGTIN2);
         updateMarkerPosition();
     }
 
@@ -141,6 +146,10 @@ public class CustomerActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.customer_layout);
 
+        mMainHandler = new SendMessageHandler();
+
+        ambulanceLocationX = new double[2];
+        ambulanceLocationY = new double[2];
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -148,11 +157,18 @@ public class CustomerActivity extends Activity implements
                 .addApi(LocationServices.API)
                 .build();
 
+        infoImageView = (ImageView) this.findViewById(R.id.list_image);
+        locationText = (TextView) this.findViewById(R.id.location);
+        infoText = (TextView) this.findViewById(R.id.title);
+
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        queryEvent();
+        infoImageView.setImageResource(R.drawable.car1);
+        infoText.setTextColor(Color.BLACK);
+        infoText.setText("주행을 시작합니다. 안전 운전 하세요.");
+        locationText.setText("현 지점 : " /*+*/ );
     }
 
     @Override
@@ -207,7 +223,6 @@ public class CustomerActivity extends Activity implements
                     REQUEST_CODE_LOCATION);
             return;
         }
-
     }
 
     @Override
@@ -245,7 +260,8 @@ public class CustomerActivity extends Activity implements
         Marker seoul = googleMap.addMarker(new MarkerOptions().position(CURRENT_LOCATION)
                 .title("사용자 위치"));
 
-        queryEvent();
+        queryEvent(SGTIN1);
+        queryEvent(SGTIN2);
         updateMarkerPosition();
     }
 
@@ -269,7 +285,7 @@ public class CustomerActivity extends Activity implements
         return doc;
     }
 
-    private void start(InputStream input) throws Exception{
+    private void start(InputStream input, String sgtin) throws Exception{
         Document doc = parseXML(input);
         NodeList descNodes = doc.getElementsByTagName("bizLocation");
         String nodeValue[] = new String[5];
@@ -286,12 +302,19 @@ public class CustomerActivity extends Activity implements
         String gpsLocation = nodeValue[3];
 
         nodeValueArray = gpsLocation.replace(" ","").split(",");
-        ambulanceLocationX = Double.parseDouble(nodeValueArray[0]);
-        ambulanceLocationY = Double.parseDouble(nodeValueArray[1]);
-        Log.d(TAG, "ambulanceLocationX : " + ambulanceLocationX +" ,ambulanceLocationY : " + ambulanceLocationY);
+        if(sgtin == SGTIN1) {
+            ambulanceLocationX[0] = Double.parseDouble(nodeValueArray[0]);
+            ambulanceLocationY[0] = Double.parseDouble(nodeValueArray[1]);
+        } else if(sgtin == SGTIN2) {
+            ambulanceLocationX[1] = Double.parseDouble(nodeValueArray[0]);
+            ambulanceLocationY[1] = Double.parseDouble(nodeValueArray[1]);
+        }
+        Log.d(TAG, "ambulanceLocationX[0] : " + ambulanceLocationX[0] +" ,ambulanceLocationY[0] : " + ambulanceLocationY[0]);
+        Log.d(TAG, "ambulanceLocationX[1] : " + ambulanceLocationX[1] +" ,ambulanceLocationY[1] : " + ambulanceLocationY[1]);
     }
 
-    private void queryEvent() {
+    private void queryEvent(String sgtin) {
+        final String id = sgtin;
         RequestQuery epcis = new RequestQuery(getApplicationContext(), new OnEventListener<String>() {
             @Override
             public void onSuccess(String result) {
@@ -299,7 +322,7 @@ public class CustomerActivity extends Activity implements
 
                 try {
                     input = new ByteArrayInputStream(result.getBytes("utf-8"));
-                    start(input);
+                    start(input, id);
                 } catch (Exception e) {
                 }
             }
@@ -308,7 +331,7 @@ public class CustomerActivity extends Activity implements
                 Log.i("fail", "Failted to query from epcis");
             }
         });
-        epcis.execute("eventCountLimit=1&MATCH_epc=" + SGTIN1);
+        epcis.execute("eventCountLimit=1&MATCH_epc=" + id);
     }
 
 
@@ -339,15 +362,14 @@ public class CustomerActivity extends Activity implements
 
     /**마커 GPS 좌표 **/
     private void updateMarkerPosition() {
-        ambulance01 = new LatLng(ambulanceLocationX , ambulanceLocationY);
-        ambulance02 = new LatLng(37.484565, 127.033963);
+        ambulance01 = new LatLng(ambulanceLocationX[0] , ambulanceLocationY[0]);
+        ambulance02 = new LatLng(ambulanceLocationX[1] , ambulanceLocationY[1]);
         myCar = new LatLng(locationX, locationY);
         accidentLocation = new LatLng(37.490678, 127.048493);
 
         addMarkersToMap();
         addCircleToMap();
     }
-
 
     public Bitmap bitmapSizeByScall(Bitmap bitmapIn, float scall_zero_to_one_f) {
 
@@ -370,7 +392,7 @@ public class CustomerActivity extends Activity implements
         mAmbulance01 = googleMap.addMarker(new MarkerOptions()
                 .position(ambulance01)
                 .title("응급차1")
-                //.snippet("Population: 2,074,200")
+                .snippet("도곡 1호차")
                 //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
                 .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
 
@@ -378,23 +400,20 @@ public class CustomerActivity extends Activity implements
         mAmbulance02 = googleMap.addMarker(new MarkerOptions()
                 .position(ambulance02)
                 .title("응급차2")
-                //.snippet("Population: 4,627,300")
-//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
+                .snippet("도곡 2호차")
                 .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
 
 
         mMyCar=  googleMap.addMarker(new MarkerOptions()
                 .position(myCar)
-                .title("내차")
-                //.snippet("Population: 4,627,300")
-                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
+                .title("내 차")
+                .snippet("내 차")
                 .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.car))));
 
         mAccidentLocation = googleMap.addMarker(new MarkerOptions()
                 .position(accidentLocation)
                 .title("사고지점")
-                //.snippet("Population: 4,137,400")
-                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.warning)));
+                .snippet("사고지점")
                 .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.warning))));
     }
 
@@ -467,6 +486,54 @@ public class CustomerActivity extends Activity implements
 //        changeSelectedMarker(marker);
 
         return true;
+    }
+
+    private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
+
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+
+        if (unit == "kilometer") {
+            dist = dist * 1.609344;
+        } else if(unit == "meter"){
+            dist = dist * 1609.344;
+        }
+
+        return (dist);
+    }
+
+
+    // This function converts decimal degrees to radians
+    private static double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    // This function converts radians to decimal degrees
+    private static double rad2deg(double rad) {
+        return (rad * 180 / Math.PI);
+    }
+
+    // 핸들러 Class
+    private class SendMessageHandler extends Handler {
+
+        @Override
+        public void handleMessage(Message msg) {
+
+            switch (msg.what) {
+                case SEND_TO_CHANGE_WARNING_INFO:
+                    infoImageView.setImageResource(R.drawable.emergency);
+                    infoText.setTextColor(Color.RED);
+                    infoText.setText("이동 경로로 구급차가 접근 중입니다. 길을 양보해주세요.");
+                    break;
+                default:
+                    break;
+
+            }
+        }
     }
 }
 
