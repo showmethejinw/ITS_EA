@@ -18,8 +18,6 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -32,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.jang.its_ea.helper.AccidentInfo;
 import com.example.jang.its_ea.helper.OnEventListener;
 import com.example.jang.its_ea.helper.RequestQuery;
 import com.google.android.gms.appindexing.Action;
@@ -91,10 +90,11 @@ public class CustomerActivity extends Activity implements
     private double locationX;
     private double locationY;
 
-    private static final String SGTIN1 = "urn:epc:id:sgtin:4012345.077889.25";
-    private static final String SGTIN2 = "urn:epc:id:sgtin:4012345.077889.26";
+    private static final String SGTIN1 = "eventCountLimit=1&MATCH_epc=urn:epc:id:sgtin:4012345.077889.25";
+    private static final String SGTIN2 = "eventCountLimit=1&MATCH_epc=urn:epc:id:sgtin:4012345.077889.26";
+    private static final String SGDTI = "urn:epc:id:gdti:";
 
-    private double ambulanceLocationX[], ambulanceLocationY[];
+    private double mEPCISLocationX[], mEPCISLocationY[];
     private String nodeValueArray[];
 
     private ImageView infoImageView;
@@ -102,16 +102,12 @@ public class CustomerActivity extends Activity implements
 
     private GoogleMap googleMap;
 
-    private Marker mAmbulance01, mAmbulance02, mMyCar, mAccidentLocation;
-    private LatLng ambulance01, ambulance02, myCar, accidentLocation;
+    private Marker mAmbulance01, mAmbulance02, mMyCar, mAccidentLoc01, mAccidentLoc02;
+    private LatLng ambulance01, ambulance02, myCar, accidentLoc01, accidentLoc02;
     private Circle mMyCarCircle;
 
-    private static final int SEND_TO_CHANGE_WARNING_INFO = 0;
-    private SendMessageHandler mMainHandler = null;
-
-    private int count = 0;
-
     private CircleOptions circleOptions;
+    private AccidentInfo[] accidentInfo;
 
     @Override
     public void onBackPressed() {
@@ -152,6 +148,7 @@ public class CustomerActivity extends Activity implements
 
         queryEvent(SGTIN1);
         queryEvent(SGTIN2);
+        queryEvent(SGDTI);
         updateMarkerPosition();
     }
 
@@ -160,10 +157,8 @@ public class CustomerActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.customer_layout);
 
-        mMainHandler = new SendMessageHandler();
-
-        ambulanceLocationX = new double[2];
-        ambulanceLocationY = new double[2];
+        mEPCISLocationX = new double[5];
+        mEPCISLocationY = new double[5];
 
         // ATTENTION: This "addApi(AppIndex.API)"was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -283,16 +278,23 @@ public class CustomerActivity extends Activity implements
 
         queryEvent(SGTIN1);
         queryEvent(SGTIN2);
+        queryEvent(SGDTI);
 
         Log.d(TAG, "SendHandleMsg");
-        if (checkDistance(locationX, locationY, ambulanceLocationX[0], ambulanceLocationY[0]) ||
-                checkDistance(locationX, locationY, ambulanceLocationX[1], ambulanceLocationY[1])) {
-            infoImageView.setImageResource(R.drawable.emergency);
-            infoText.setTextColor(Color.RED);
-            infoText.setText("이동 경로로 구급차가 접근 중입니다. 길을 양보해주세요.");
-            locationText.setTextColor(Color.RED);
-            locationText.setText("사고 지점 : " + getAddress(CustomerActivity.this, 0, 0));
-            addCircleToMap(true);
+        if (checkDistance(locationX, locationY, mEPCISLocationX[0], mEPCISLocationY[0]) ||
+                    checkDistance(locationX, locationY, mEPCISLocationX[1], mEPCISLocationY[1])) {
+                infoImageView.setImageResource(R.drawable.emergency);
+                infoText.setTextColor(Color.RED);
+                infoText.setText("이동 경로로 구급차가 접근 중입니다. 길을 양보해주세요.");
+                locationText.setTextColor(Color.RED);
+            if (mEPCISLocationX[2] != 0 && mEPCISLocationX[3] == 0) {
+                locationText.setText("사고 지점 : " + getAddress(CustomerActivity.this, mEPCISLocationX[2], mEPCISLocationY[2]));
+            } else if (mEPCISLocationX[2] != 0 && mEPCISLocationX[3] != 0) {
+                locationText.setText("사고지점 1: " + getAddress(CustomerActivity.this, mEPCISLocationX[2], mEPCISLocationY[2]) +"\n사고지점 2:" + getAddress(CustomerActivity.this, mEPCISLocationX[3], mEPCISLocationY[3]));
+            } else {
+                locationText.setText("사고 지점 : 위치를 파악할 수 없습니다.");
+            }
+                addCircleToMap(true);
         } else {
             infoImageView.setImageResource(R.drawable.car1);
             infoText.setTextColor(Color.BLACK);
@@ -324,36 +326,71 @@ public class CustomerActivity extends Activity implements
         return doc;
     }
 
-    private void start(InputStream input, String sgtin) throws Exception {
+    private void start(InputStream input, String id) throws Exception {
         Document doc = parseXML(input);
-        NodeList descNodes = doc.getElementsByTagName("bizLocation");
-        String nodeValue[] = new String[5];
-        for (int i = 0; i < descNodes.getLength(); i++) {
-            int j = 0;
-            for (Node node = descNodes.item(i).getFirstChild(); node != null; node = node.getNextSibling()) { //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
+        String gpsLocation = null;
+        if (id == SGTIN1 || id == SGTIN2) {
+            NodeList descNodes = doc.getElementsByTagName("bizLocation");
+            String nodeValue[] = new String[5];
+            for (int i = 0; i < descNodes.getLength(); i++) {
+                int j = 0;
+                for (Node node = descNodes.item(i).getFirstChild(); node != null; node = node.getNextSibling()) { //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
 
-                nodeValue[j] = node.getTextContent();
+                    nodeValue[j] = node.getTextContent();
 //                Log.d(TAG, "nodeValue [" + j + "]" + nodeValue[j]);  //결과값
-                ++j;
+                    ++j;
+                }
+            }
+
+            // Set GPS Location value from EPCIS
+            gpsLocation = nodeValue[3];
+            nodeValueArray = gpsLocation.replace(" ", "").split(",");
+
+            if (id == SGTIN1) {
+                mEPCISLocationX[0] = Double.parseDouble(nodeValueArray[0]);
+                mEPCISLocationY[0] = Double.parseDouble(nodeValueArray[1]);
+            } else if (id == SGTIN2) {
+                mEPCISLocationX[1] = Double.parseDouble(nodeValueArray[0]);
+                mEPCISLocationY[1] = Double.parseDouble(nodeValueArray[1]);
+            }
+
+        } else if (id == SGDTI) {
+            NodeList descNodes = doc.getElementsByTagName("ObjectEvent");
+            accidentInfo = new AccidentInfo[descNodes.getLength()];
+
+            for (int i = 0; i < descNodes.getLength(); i++) {
+                accidentInfo[i] = new AccidentInfo();
+                for (Node node = descNodes.item(i).getFirstChild(); node != null; node = node.getNextSibling()) { //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
+
+                    if (node.getNodeName().equals("accident:address_lat")) {
+//                        Log.d(TAG, "Accident lat [i]: " + i +", " + node.getTextContent());
+                        accidentInfo[i].setAddressLat(Double.parseDouble(node.getTextContent()));
+                    }
+
+                    if (node.getNodeName().equals("accident:address_lon")) {
+//                        Log.d(TAG, "Accident lon [i]: " + i +", " + node.getTextContent());
+                        accidentInfo[i].setAddressLon(Double.parseDouble(node.getTextContent()));
+                    }
+
+                    if (mEPCISLocationX[2] == 0 && mEPCISLocationY[2] == 0) {
+                        mEPCISLocationX[2] = accidentInfo[i].getAddressLat();
+                        mEPCISLocationY[2] = accidentInfo[i].getAddressLon();
+                    } else if(accidentInfo[i].getAddressLat() != mEPCISLocationX[2] && accidentInfo[i].getAddressLon() != mEPCISLocationY[2]) {
+                        mEPCISLocationX[3] = accidentInfo[i].getAddressLat();
+                        mEPCISLocationY[3] = accidentInfo[i].getAddressLon();
+                    }
+
+                }
             }
         }
 
-        String gpsLocation = nodeValue[3];
-
-        nodeValueArray = gpsLocation.replace(" ", "").split(",");
-        if (sgtin == SGTIN1) {
-            ambulanceLocationX[0] = Double.parseDouble(nodeValueArray[0]);
-            ambulanceLocationY[0] = Double.parseDouble(nodeValueArray[1]);
-        } else if (sgtin == SGTIN2) {
-            ambulanceLocationX[1] = Double.parseDouble(nodeValueArray[0]);
-            ambulanceLocationY[1] = Double.parseDouble(nodeValueArray[1]);
-        }
-        Log.d(TAG, "ambulanceLocationX[0] : " + ambulanceLocationX[0] + " ,ambulanceLocationY[0] : " + ambulanceLocationY[0]);
-        Log.d(TAG, "ambulanceLocationX[1] : " + ambulanceLocationX[1] + " ,ambulanceLocationY[1] : " + ambulanceLocationY[1]);
+//        Log.d(TAG, "mEPCISLocationX[0] : " + mEPCISLocationX[0] + " ,mEPCISLocationY[0] : " + mEPCISLocationY[0]);
+//        Log.d(TAG, "mEPCISLocationX[1] : " + mEPCISLocationX[1] + " ,mEPCISLocationY[1] : " + mEPCISLocationY[1]);
+//        Log.d(TAG, "mEPCISLocationX[2] : " + mEPCISLocationX[2] + " ,mEPCISLocationY[2] : " + mEPCISLocationY[2]);
     }
 
-    private void queryEvent(String sgtin) {
-        final String id = sgtin;
+    private void queryEvent(String epcId) {
+        final String id = epcId;
         RequestQuery epcis = new RequestQuery(getApplicationContext(), new OnEventListener<String>() {
             @Override
             public void onSuccess(String result) {
@@ -370,7 +407,7 @@ public class CustomerActivity extends Activity implements
                 Log.i("fail", "Failted to query from epcis");
             }
         });
-        epcis.execute("eventCountLimit=1&MATCH_epc=" + id);
+        epcis.execute(id);
     }
 
 
@@ -404,17 +441,18 @@ public class CustomerActivity extends Activity implements
      **/
     private void updateMarkerPosition() {
 
-        ambulance01 = new LatLng(ambulanceLocationX[0], ambulanceLocationY[0]);
-        ambulance02 = new LatLng(ambulanceLocationX[1], ambulanceLocationY[1]);
+        ambulance01 = new LatLng(mEPCISLocationX[0], mEPCISLocationY[0]);
+        ambulance02 = new LatLng(mEPCISLocationX[1], mEPCISLocationY[1]);
         myCar = new LatLng(locationX, locationY);
-        accidentLocation = new LatLng(37.490678, 127.048493);
+        accidentLoc01 = new LatLng(mEPCISLocationX[2], mEPCISLocationY[2]);
+        accidentLoc02 = new LatLng(mEPCISLocationX[3], mEPCISLocationY[3]);
 
         addMarkersToMap();
 
     }
 
     public static String getAddress(Context mContext, double lat, double lng) {
-        String nowAddress = "현재 위치를 확인할 수 없습니다.";
+        String nowAddress = "위치를 확인할 수 없습니다.";
         Geocoder geocoder = new Geocoder(mContext, Locale.KOREA);
         List<Address> address;
         try {
@@ -489,8 +527,14 @@ public class CustomerActivity extends Activity implements
                 .snippet("내 차")
                 .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.car))));
 
-        mAccidentLocation = googleMap.addMarker(new MarkerOptions()
-                .position(accidentLocation)
+        mAccidentLoc01 = googleMap.addMarker(new MarkerOptions()
+                .position(accidentLoc01)
+                .title("사고지점")
+                .snippet("사고지점")
+                .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.warning))));
+
+        mAccidentLoc02 = googleMap.addMarker(new MarkerOptions()
+                .position(accidentLoc02)
                 .title("사고지점")
                 .snippet("사고지점")
                 .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.warning))));
@@ -622,25 +666,5 @@ public class CustomerActivity extends Activity implements
                 .setObject(object)
                 .setActionStatus(Action.STATUS_TYPE_COMPLETED)
                 .build();
-    }
-
-    // 핸들러 Class
-    private class SendMessageHandler extends Handler {
-
-        @Override
-        public void handleMessage(Message msg) {
-
-            switch (msg.what) {
-                case SEND_TO_CHANGE_WARNING_INFO:
-                    infoImageView.setImageResource(R.drawable.emergency);
-                    infoText.setTextColor(Color.RED);
-                    infoText.setText("이동 경로로 구급차가 접근 중입니다. 길을 양보해주세요.");
-                    locationText.setText("사고 지점 : " + getAddress(CustomerActivity.this, 0, 0));
-                    break;
-                default:
-                    break;
-
-            }
-        }
     }
 }
