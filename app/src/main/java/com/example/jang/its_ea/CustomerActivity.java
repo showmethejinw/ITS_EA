@@ -9,7 +9,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -38,6 +40,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -68,6 +72,7 @@ public class CustomerActivity extends Activity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback,GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
 
     static final LatLng SEOUL = new LatLng(37.56, 126.97);
+    static final LatLng KAIST_SW = new LatLng(37.483762, 127.043962);
     private static final String TAG = "Customer";
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -88,6 +93,7 @@ public class CustomerActivity extends Activity implements
     private View marker_root_view;
     private Marker mAmbulance01, mAmbulance02, mMyCar, mAccidentLocation;
     private LatLng ambulance01, ambulance02, myCar, accidentLocation;
+    private Circle mMyCarCircle;
 
     @Override
     public void onBackPressed() {
@@ -113,18 +119,15 @@ public class CustomerActivity extends Activity implements
             return;
         }
         googleMap.setMyLocationEnabled(true);
-//        Marker seoul = googleMap.addMarker(new MarkerOptions().position(SEOUL)
-//                .title("Seoul"));
 
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(SEOUL, 5));
+        //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(SEOUL, 5));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(KAIST_SW, 12));
 
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(5), 2000, null);
 
         googleMap.setOnMarkerClickListener(this);
         googleMap.setOnMapClickListener(this);
 
-/*        googleMap.addMarker(new MarkerOptions().position(new LatLng(37.48372341039549 , 127.04207226634026))
-                .title("ambulance"));*/
 
 //        setCustomMarkerView();
 //        getSampleMarkerItems();
@@ -242,14 +245,6 @@ public class CustomerActivity extends Activity implements
         Marker seoul = googleMap.addMarker(new MarkerOptions().position(CURRENT_LOCATION)
                 .title("사용자 위치"));
 
-//        googleMap.addMarker(new MarkerOptions().position(new LatLng(37.48372341039549 , 127.04207226634026))
-//                .title("ambulance"));
-
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CURRENT_LOCATION, 16));
-
-//        setCustomMarkerView();
-//        getSampleMarkerItems();
-
         queryEvent();
         updateMarkerPosition();
     }
@@ -350,6 +345,23 @@ public class CustomerActivity extends Activity implements
         accidentLocation = new LatLng(37.490678, 127.048493);
 
         addMarkersToMap();
+        addCircleToMap();
+    }
+
+
+    public Bitmap bitmapSizeByScall(Bitmap bitmapIn, float scall_zero_to_one_f) {
+
+        Bitmap bitmapOut = Bitmap.createScaledBitmap(bitmapIn,
+                Math.round(bitmapIn.getWidth() * scall_zero_to_one_f),
+                Math.round(bitmapIn.getHeight() * scall_zero_to_one_f), false);
+
+        return bitmapOut;
+    }
+
+    private Bitmap markerIconResToBitmap(int res) {
+        Bitmap orgImage =
+                BitmapFactory.decodeResource(getResources(), res);
+        return bitmapSizeByScall(orgImage, 0.5f);
     }
 
     /**마커**/
@@ -359,53 +371,44 @@ public class CustomerActivity extends Activity implements
                 .position(ambulance01)
                 .title("응급차1")
                 //.snippet("Population: 2,074,200")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
+                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
+                .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
+
 
         mAmbulance02 = googleMap.addMarker(new MarkerOptions()
                 .position(ambulance02)
                 .title("응급차2")
                 //.snippet("Population: 4,627,300")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
+//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
+                .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
+
 
         mMyCar=  googleMap.addMarker(new MarkerOptions()
                 .position(myCar)
                 .title("내차")
                 //.snippet("Population: 4,627,300")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
+                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
+                .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.car))));
 
         mAccidentLocation = googleMap.addMarker(new MarkerOptions()
                 .position(accidentLocation)
                 .title("사고지점")
                 //.snippet("Population: 4,137,400")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.warning)));
+                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.warning)));
+                .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.warning))));
     }
 
+    private void addCircleToMap() {
+        CircleOptions circleOptions = new CircleOptions()
+                .center(myCar)   //set center
+                .radius(500)   //set radius in meters
+                .strokeWidth(5)
+                .strokeColor(Color.BLUE)
+                .fillColor(Color.parseColor("#500084d3"));
 
-    private Marker addMarker(MarkerItem markerItem, boolean isSelectedMarker) {
-
-
-        LatLng position = new LatLng(markerItem.getLat(), markerItem.getLon());
-        String destination= markerItem.getDestination();
-//        String formatted = NumberFormat.getCurrencyInstance().format((destination));
-
-        tv_marker.setText(destination);
-
-//        if (isSelectedMarker) {
-//            tv_marker.setBackgroundResource(R.drawable.ic_marker_phone_blue);
-//            tv_marker.setTextColor(Color.WHITE);
-//        } else {
-//            tv_marker.setBackgroundResource(R.drawable.ic_marker_phone);
-//            tv_marker.setTextColor(Color.BLACK);
-//        }
-
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.title(destination);
-        markerOptions.position(position);
-        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this, marker_root_view)));
-
-
-        return googleMap.addMarker(markerOptions);
+        mMyCarCircle = googleMap.addCircle(circleOptions);
     }
+
 
     // View를 Bitmap으로 변환
     private Bitmap createDrawableFromView(Context context, View view) {
