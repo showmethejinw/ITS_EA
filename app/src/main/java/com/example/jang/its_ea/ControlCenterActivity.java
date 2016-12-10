@@ -25,7 +25,9 @@ import android.widget.Toast;
 
 import com.example.jang.its_ea.helper.AccidentInfo;
 import com.example.jang.its_ea.helper.IconTextItem;
+import com.example.jang.its_ea.helper.IconTextItem2;
 import com.example.jang.its_ea.helper.IconTextListAdapter;
+import com.example.jang.its_ea.helper.IconTextListAdapter2;
 import com.example.jang.its_ea.helper.OnEventListener;
 import com.example.jang.its_ea.helper.RequestCapture;
 import com.example.jang.its_ea.helper.RequestQuery;
@@ -54,7 +56,7 @@ public class ControlCenterActivity extends AppCompatActivity {
     private Geocoder geocoder;
 
     private ListView listview;
-    private IconTextListAdapter adapter;
+    private IconTextListAdapter2 adapter;
 
     private AccidentInfo accidentInfo;
     private  TabHost tab_host;
@@ -231,7 +233,7 @@ public class ControlCenterActivity extends AppCompatActivity {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {          //리스트 뷰에서 리스트 중 하나를 클릭 했을 때발생
-                IconTextItem curItem = (IconTextItem) adapter.getItem(position);
+                IconTextItem2 curItem = (IconTextItem2) adapter.getItem(position);
                 final String[] curData = curItem.getData();
                 number = position;
                 AlertDialog.Builder alert_confirm = new AlertDialog.Builder(ControlCenterActivity.this);
@@ -304,7 +306,7 @@ public class ControlCenterActivity extends AppCompatActivity {
         spinner.setSelection(0);
 
         listview = (ListView) findViewById(R.id.listview);
-        adapter = new IconTextListAdapter(this);
+        adapter = new IconTextListAdapter2(this);
 //
 //        listview.setAdapter(adapter);
 
@@ -344,7 +346,15 @@ public class ControlCenterActivity extends AppCompatActivity {
                 if(node.getNodeName().equals("accident:address")){
 
                     accidentInfoList[i].setAddress(node.getTextContent());
-                    adapter.addItem(new IconTextItem(node.getTextContent()));
+                    String [] array = new String[3];
+                    array[0] = new String();
+                    array[1] = new String();
+                    array[2] = new String();
+
+                    array[0] = node.getTextContent();
+                    array[1] = "test";
+                    array[2] = "test2";
+                    adapter.addItem(new IconTextItem2(node.getTextContent(), "test", "test2"));
                     listview.setAdapter(adapter);
 
                     Log.d("result_", node.getTextContent());      //결과값

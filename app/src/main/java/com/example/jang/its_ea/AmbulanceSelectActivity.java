@@ -181,6 +181,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
                 "        <accident:hostpital_lat>" + hospital_lat+ "</accident:hostpital_lat>\n" +
                 "        <accident:hostpital_lon>" + hospital_lon+ "</accident:hostpital_lon>\n" +
                 "        <accident:type>" + accidentInfo.getAccidentType()+ "</accident:type>\n" +
+                "        <accident:ambulance>" + SGTIN+ "</accident:ambulance>\n" +
 
                 "      </ObjectEvent>\n" +
                 "    </EventList>\n" +
