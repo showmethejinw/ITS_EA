@@ -90,12 +90,12 @@ public class CustomerActivity extends Activity implements
     private double locationX;
     private double locationY;
 
-    private static final String SGTIN1 = "eventCountLimit=1&MATCH_epc=urn:epc:id:sgtin:4012345.077889.25";
-    private static final String SGTIN2 = "eventCountLimit=1&MATCH_epc=urn:epc:id:sgtin:4012345.077889.26";
+    private static final String SGTIN1 = "eventCountLimit=1&orderBy=eventTime&MATCH_epc=urn:epc:id:sgtin:4012345.077889.25";
+    private static final String SGTIN2 = "eventCountLimit=1&orderBy=eventTime&MATCH_epc=urn:epc:id:sgtin:4012345.077889.26";
     private static final String SGDTI = "urn:epc:id:gdti:";
 
     private double mEPCISLocationX[], mEPCISLocationY[];
-    private String nodeValueArray[];
+    private String nodeValueArray[], mEPCISBizStep[];
 
     private ImageView infoImageView;
     private TextView infoText, locationText;
@@ -108,6 +108,7 @@ public class CustomerActivity extends Activity implements
 
     private CircleOptions circleOptions;
     private AccidentInfo[] accidentInfo;
+
 
     @Override
     public void onBackPressed() {
@@ -159,6 +160,8 @@ public class CustomerActivity extends Activity implements
 
         mEPCISLocationX = new double[5];
         mEPCISLocationY = new double[5];
+
+        mEPCISBizStep = new String[2];
 
         // ATTENTION: This "addApi(AppIndex.API)"was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -290,11 +293,12 @@ public class CustomerActivity extends Activity implements
             if (mEPCISLocationX[2] != 0 && mEPCISLocationX[3] == 0) {
                 locationText.setText("사고 지점 : " + getAddress(CustomerActivity.this, mEPCISLocationX[2], mEPCISLocationY[2]));
             } else if (mEPCISLocationX[2] != 0 && mEPCISLocationX[3] != 0) {
-                locationText.setText("사고지점 1: " + getAddress(CustomerActivity.this, mEPCISLocationX[2], mEPCISLocationY[2]) +"\n사고지점 2:" + getAddress(CustomerActivity.this, mEPCISLocationX[3], mEPCISLocationY[3]));
+                locationText.setText("사고지점 1: " + getAddress(CustomerActivity.this, mEPCISLocationX[2], mEPCISLocationY[2]) +"\n사고지점 2: " + getAddress(CustomerActivity.this, mEPCISLocationX[3], mEPCISLocationY[3]));
             } else {
                 locationText.setText("사고 지점 : 위치를 파악할 수 없습니다.");
             }
-                addCircleToMap(true);
+
+            addCircleToMap(true);
         } else {
             infoImageView.setImageResource(R.drawable.car1);
             infoText.setTextColor(Color.BLACK);
@@ -329,12 +333,26 @@ public class CustomerActivity extends Activity implements
     private void start(InputStream input, String id) throws Exception {
         Document doc = parseXML(input);
         String gpsLocation = null;
+        String bizStep = null;
+
         if (id == SGTIN1 || id == SGTIN2) {
-            NodeList descNodes = doc.getElementsByTagName("bizLocation");
+            NodeList objectNode = doc.getElementsByTagName("ObjectEvent");
+            for (int i = 0; i < objectNode.getLength(); i++) {
+                for (Node node = objectNode.item(i).getFirstChild(); node != null; node = node.getNextSibling()) { //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
+
+                    if (node.getNodeName().equals("bizStep")) {
+                        //Log.d(TAG, "bizStep : " + node.getTextContent());
+                        bizStep = node.getTextContent();
+                    }
+                }
+            }
+
+
+            NodeList bizNode = doc.getElementsByTagName("bizLocation");
             String nodeValue[] = new String[5];
-            for (int i = 0; i < descNodes.getLength(); i++) {
+            for (int i = 0; i < bizNode.getLength(); i++) {
                 int j = 0;
-                for (Node node = descNodes.item(i).getFirstChild(); node != null; node = node.getNextSibling()) { //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
+                for (Node node = bizNode.item(i).getFirstChild(); node != null; node = node.getNextSibling()) { //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
 
                     nodeValue[j] = node.getTextContent();
 //                Log.d(TAG, "nodeValue [" + j + "]" + nodeValue[j]);  //결과값
@@ -349,9 +367,11 @@ public class CustomerActivity extends Activity implements
             if (id == SGTIN1) {
                 mEPCISLocationX[0] = Double.parseDouble(nodeValueArray[0]);
                 mEPCISLocationY[0] = Double.parseDouble(nodeValueArray[1]);
+                mEPCISBizStep[0] = bizStep.split(":")[4];
             } else if (id == SGTIN2) {
                 mEPCISLocationX[1] = Double.parseDouble(nodeValueArray[0]);
                 mEPCISLocationY[1] = Double.parseDouble(nodeValueArray[1]);
+                mEPCISBizStep[1] = bizStep.split(":")[4];
             }
 
         } else if (id == SGDTI) {
@@ -384,8 +404,8 @@ public class CustomerActivity extends Activity implements
             }
         }
 
-//        Log.d(TAG, "mEPCISLocationX[0] : " + mEPCISLocationX[0] + " ,mEPCISLocationY[0] : " + mEPCISLocationY[0]);
-//        Log.d(TAG, "mEPCISLocationX[1] : " + mEPCISLocationX[1] + " ,mEPCISLocationY[1] : " + mEPCISLocationY[1]);
+        Log.d(TAG, "mEPCISLocationX[0] : " + mEPCISLocationX[0] + " ,mEPCISLocationY[0] : " + mEPCISLocationY[0]);
+        Log.d(TAG, "mEPCISLocationX[1] : " + mEPCISLocationX[1] + " ,mEPCISLocationY[1] : " + mEPCISLocationY[1]);
 //        Log.d(TAG, "mEPCISLocationX[2] : " + mEPCISLocationX[2] + " ,mEPCISLocationY[2] : " + mEPCISLocationY[2]);
     }
 
@@ -443,12 +463,12 @@ public class CustomerActivity extends Activity implements
 
         ambulance01 = new LatLng(mEPCISLocationX[0], mEPCISLocationY[0]);
         ambulance02 = new LatLng(mEPCISLocationX[1], mEPCISLocationY[1]);
+
         myCar = new LatLng(locationX, locationY);
         accidentLoc01 = new LatLng(mEPCISLocationX[2], mEPCISLocationY[2]);
         accidentLoc02 = new LatLng(mEPCISLocationX[3], mEPCISLocationY[3]);
 
         addMarkersToMap();
-
     }
 
     public static String getAddress(Context mContext, double lat, double lng) {
@@ -477,11 +497,17 @@ public class CustomerActivity extends Activity implements
             return false;
 
         double dist = distance(myX1, myY1, ambulX2, ambulY2, "meter");
-        Log.d(TAG, "dist : " + dist);
+        //Log.d(TAG, "dist : " + dist);
         if ((0 <= dist) && (dist < 200)) {
-            return true;
+            if (mEPCISBizStep[0] == null || mEPCISBizStep[1] == null  ) {
+                return false;
+            } else if (mEPCISBizStep[0].equals("departuring")) {
+                return true;
+            } else if (mEPCISBizStep[1].equals("departuring")) {
+                return true;
+            }
+            return false;
         } else {
-            locationText.setText("현 지점 : " + getAddress(this, myX1, myY1));
             return false;
         }
     }
@@ -498,28 +524,47 @@ public class CustomerActivity extends Activity implements
     private Bitmap markerIconResToBitmap(int res) {
         Bitmap orgImage =
                 BitmapFactory.decodeResource(getResources(), res);
-        return bitmapSizeByScall(orgImage, 0.3f);  // Icon Image Scale
+        return bitmapSizeByScall(orgImage, 0.35f);  // Icon Image Scale
     }
 
     /**
      * 마커
      **/
     private void addMarkersToMap() {
+        Log.d(TAG, "am01 : " + mEPCISBizStep[0] + " ,am02 : " + mEPCISBizStep[1]);
 
-        mAmbulance01 = googleMap.addMarker(new MarkerOptions()
-                .position(ambulance01)
-                .title("응급차1")
-                .snippet("도곡 1호차")
-                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
-                .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
+        if (mEPCISBizStep[0] == null) return;
+        else if (mEPCISBizStep[0].equals("departuring")) {
+            mAmbulance01 = googleMap.addMarker(new MarkerOptions()
+                    .position(ambulance01)
+                    .title("응급차1")
+                    .snippet("도곡 1호차")
+                    //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
+                    .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
+        } else {
+            Log.d(TAG, "mAmbulance01 : remove");
+            try {
+                mAmbulance01.remove();
+            } catch (Exception e) {
+                Log.d(TAG, "mAmbulance01 is null");
+            }
+        }
 
-
-        mAmbulance02 = googleMap.addMarker(new MarkerOptions()
-                .position(ambulance02)
-                .title("응급차2")
-                .snippet("도곡 2호차")
-                .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
-
+        if (mEPCISBizStep[1] == null) return;
+        else if(mEPCISBizStep[1].equals("departuring")) {
+            mAmbulance02 = googleMap.addMarker(new MarkerOptions()
+                    .position(ambulance02)
+                    .title("응급차2")
+                    .snippet("도곡 2호차")
+                    .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
+        } else {
+            Log.d(TAG, "mAmbulance02 : remove");
+            try {
+                mAmbulance02.remove();
+            } catch (Exception e) {
+                Log.d(TAG, "mAmbulance02 is null");
+            }
+        }
 
         mMyCar = googleMap.addMarker(new MarkerOptions()
                 .position(myCar)
