@@ -80,7 +80,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 
 public class CustomerActivity extends Activity implements
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback,GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
 
     static final LatLng SEOUL = new LatLng(37.56, 126.97);
     static final LatLng KAIST_SW = new LatLng(37.483762, 127.043962);
@@ -108,6 +108,10 @@ public class CustomerActivity extends Activity implements
 
     private static final int SEND_TO_CHANGE_WARNING_INFO = 0;
     private SendMessageHandler mMainHandler = null;
+
+    private int count = 0;
+
+    private CircleOptions circleOptions;
 
     @Override
     public void onBackPressed() {
@@ -281,33 +285,46 @@ public class CustomerActivity extends Activity implements
         queryEvent(SGTIN2);
 
         Log.d(TAG, "SendHandleMsg");
-        sendHandleMsgByDistance(locationX, locationY, ambulanceLocationX[0], ambulanceLocationY[0]);
-        sendHandleMsgByDistance(locationX, locationY, ambulanceLocationX[1], ambulanceLocationY[1]);
-
+        if (checkDistance(locationX, locationY, ambulanceLocationX[0], ambulanceLocationY[0]) ||
+                checkDistance(locationX, locationY, ambulanceLocationX[1], ambulanceLocationY[1])) {
+            infoImageView.setImageResource(R.drawable.emergency);
+            infoText.setTextColor(Color.RED);
+            infoText.setText("이동 경로로 구급차가 접근 중입니다. 길을 양보해주세요.");
+            locationText.setTextColor(Color.RED);
+            locationText.setText("사고 지점 : " + getAddress(CustomerActivity.this, 0, 0));
+            addCircleToMap(true);
+        } else {
+            infoImageView.setImageResource(R.drawable.car1);
+            infoText.setTextColor(Color.BLACK);
+            infoText.setText("주행을 시작합니다. 안전 운전 하세요.");
+            locationText.setTextColor(Color.BLACK);
+            locationText.setText("현 지점 : " + getAddress(this, locationX, locationY));
+            addCircleToMap(false);
+        }
         updateMarkerPosition();
     }
 
-    private Document parseXML(InputStream stream) throws Exception{
+    private Document parseXML(InputStream stream) throws Exception {
 
         DocumentBuilderFactory objDocumentBuilderFactory = null;
         DocumentBuilder objDocumentBuilder = null;
         Document doc = null;
 
-        try{
+        try {
 
             objDocumentBuilderFactory = DocumentBuilderFactory.newInstance();
             objDocumentBuilder = objDocumentBuilderFactory.newDocumentBuilder();
 
             doc = objDocumentBuilder.parse(stream);
 
-        }catch(Exception ex){
+        } catch (Exception ex) {
             throw ex;
         }
 
         return doc;
     }
 
-    private void start(InputStream input, String sgtin) throws Exception{
+    private void start(InputStream input, String sgtin) throws Exception {
         Document doc = parseXML(input);
         NodeList descNodes = doc.getElementsByTagName("bizLocation");
         String nodeValue[] = new String[5];
@@ -323,16 +340,16 @@ public class CustomerActivity extends Activity implements
 
         String gpsLocation = nodeValue[3];
 
-        nodeValueArray = gpsLocation.replace(" ","").split(",");
-        if(sgtin == SGTIN1) {
+        nodeValueArray = gpsLocation.replace(" ", "").split(",");
+        if (sgtin == SGTIN1) {
             ambulanceLocationX[0] = Double.parseDouble(nodeValueArray[0]);
             ambulanceLocationY[0] = Double.parseDouble(nodeValueArray[1]);
-        } else if(sgtin == SGTIN2) {
+        } else if (sgtin == SGTIN2) {
             ambulanceLocationX[1] = Double.parseDouble(nodeValueArray[0]);
             ambulanceLocationY[1] = Double.parseDouble(nodeValueArray[1]);
         }
-        Log.d(TAG, "ambulanceLocationX[0] : " + ambulanceLocationX[0] +" ,ambulanceLocationY[0] : " + ambulanceLocationY[0]);
-        Log.d(TAG, "ambulanceLocationX[1] : " + ambulanceLocationX[1] +" ,ambulanceLocationY[1] : " + ambulanceLocationY[1]);
+        Log.d(TAG, "ambulanceLocationX[0] : " + ambulanceLocationX[0] + " ,ambulanceLocationY[0] : " + ambulanceLocationY[0]);
+        Log.d(TAG, "ambulanceLocationX[1] : " + ambulanceLocationX[1] + " ,ambulanceLocationY[1] : " + ambulanceLocationY[1]);
     }
 
     private void queryEvent(String sgtin) {
@@ -378,20 +395,22 @@ public class CustomerActivity extends Activity implements
             Log.d(TAG, "Start Location update");
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         } else {
-            Toast.makeText(this,"Location Unavailable",Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Location Unavailable", Toast.LENGTH_LONG).show();
         }
     }
 
-    /**마커 GPS 좌표 **/
+    /**
+     * 마커 GPS 좌표
+     **/
     private void updateMarkerPosition() {
 
-        ambulance01 = new LatLng(ambulanceLocationX[0] , ambulanceLocationY[0]);
-        ambulance02 = new LatLng(ambulanceLocationX[1] , ambulanceLocationY[1]);
+        ambulance01 = new LatLng(ambulanceLocationX[0], ambulanceLocationY[0]);
+        ambulance02 = new LatLng(ambulanceLocationX[1], ambulanceLocationY[1]);
         myCar = new LatLng(locationX, locationY);
         accidentLocation = new LatLng(37.490678, 127.048493);
 
         addMarkersToMap();
-        addCircleToMap();
+
     }
 
     public static String getAddress(Context mContext, double lat, double lng) {
@@ -403,7 +422,7 @@ public class CustomerActivity extends Activity implements
                 address = geocoder.getFromLocation(lat, lng, 1);
                 if (address != null && address.size() > 0) {
                     String currentLocationAddress = address.get(0).getAddressLine(0).toString();
-                    if(currentLocationAddress != null) {
+                    if (currentLocationAddress != null) {
                         nowAddress = currentLocationAddress;
                     }
                 }
@@ -414,16 +433,18 @@ public class CustomerActivity extends Activity implements
         return nowAddress;
     }
 
-    private void sendHandleMsgByDistance(double myX1, double myY1, double ambulX2, double ambulY2) {
+
+    private boolean checkDistance(double myX1, double myY1, double ambulX2, double ambulY2) {
         if ((myX1 == 0) || (myY1 == 0) || (ambulX2 == 0) || (ambulY2 == 0))
-            return;
+            return false;
 
         double dist = distance(myX1, myY1, ambulX2, ambulY2, "meter");
         Log.d(TAG, "dist : " + dist);
-        if ((0 <= dist) && (dist < 50)) {
-            mMainHandler.obtainMessage(SEND_TO_CHANGE_WARNING_INFO);
+        if ((0 <= dist) && (dist < 200)) {
+            return true;
         } else {
             locationText.setText("현 지점 : " + getAddress(this, myX1, myY1));
+            return false;
         }
     }
 
@@ -442,7 +463,9 @@ public class CustomerActivity extends Activity implements
         return bitmapSizeByScall(orgImage, 0.3f);  // Icon Image Scale
     }
 
-    /**마커**/
+    /**
+     * 마커
+     **/
     private void addMarkersToMap() {
 
         mAmbulance01 = googleMap.addMarker(new MarkerOptions()
@@ -460,7 +483,7 @@ public class CustomerActivity extends Activity implements
                 .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
 
 
-        mMyCar=  googleMap.addMarker(new MarkerOptions()
+        mMyCar = googleMap.addMarker(new MarkerOptions()
                 .position(myCar)
                 .title("내 차")
                 .snippet("내 차")
@@ -473,15 +496,26 @@ public class CustomerActivity extends Activity implements
                 .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.warning))));
     }
 
-    private void addCircleToMap() {
-        CircleOptions circleOptions = new CircleOptions()
-                .center(myCar)   //set center
-                .radius(500)   //set radius in meters
-                .strokeWidth(5)
-                .strokeColor(Color.BLUE)
-                .fillColor(Color.parseColor("#500084d3"));
+    private void addCircleToMap(boolean near) {
+        if (near) {
+            circleOptions = new CircleOptions()
+                    .center(myCar)   //set center
+                    .radius(200)   //set radius in meters
+                    .strokeWidth(5)
+                    .strokeColor(Color.RED)
+                    .fillColor(Color.parseColor("#50F8bbd0"));
 
+        } else {
+            circleOptions = new CircleOptions()
+                    .center(myCar)   //set center
+                    .radius(200)   //set radius in meters
+                    .strokeWidth(5)
+                    .strokeColor(Color.BLUE)
+                    .fillColor(Color.parseColor("#500084d3"));
+
+        }
         mMyCarCircle = googleMap.addCircle(circleOptions);
+
     }
 
 
@@ -503,7 +537,9 @@ public class CustomerActivity extends Activity implements
     }
 
 
-    /**마커 클릭했을 때 이미지 바꿔주는 것**/
+    /**
+     * 마커 클릭했을 때 이미지 바꿔주는 것
+     **/
 //    private Marker addMarker(Marker marker, boolean isSelectedMarker) {
 //        double lat = marker.getPosition().latitude;
 //        double lon = marker.getPosition().longitude;
@@ -527,7 +563,6 @@ public class CustomerActivity extends Activity implements
 //
 //
 //    }
-
     @Override
     public void onMapClick(LatLng latLng) {
         /**마커 클릭했을 때 이미지 바꿔주는 것**/
@@ -555,7 +590,7 @@ public class CustomerActivity extends Activity implements
 
         if (unit == "kilometer") {
             dist = dist * 1.609344;
-        } else if(unit == "meter"){
+        } else if (unit == "meter") {
             dist = dist * 1609.344;
         }
 
@@ -609,4 +644,3 @@ public class CustomerActivity extends Activity implements
         }
     }
 }
-

@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/thumbnail"
         android:layout_toRightOf="@+id/thumbnail"
-        android:textSize="25dip"
+        android:textSize="20dip"
         android:textStyle="bold"
         android:typeface="sans" />
 
@@ -50,6 +50,6 @@
         android:layout_marginTop="1dip"
         android:layout_toRightOf="@+id/thumbnail"
         android:textColor="#343434"
-        android:textSize="10dip" />
+        android:textSize="15dip" />
 
 </RelativeLayout>
