@@ -44,14 +44,17 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
     private String eventDate, eventTime;
 
     private double locationX, locationY;
-
+    private double locationX2,locationY2;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
 
     private static final int  REQUEST_CODE_LOCATION = 2;
-    private static final String SGTIN = "urn:epc:id:sgtin:4012345.077889.25";
 
+    private static final String SGTIN1 = "urn:epc:id:sgtin:4012345.077889.25";
+    private static final String SGTIN2 = "urn:epc:id:sgtin:4012345.077889.26";
 
+    private boolean test = true;
+//    private boolean test = false;
     @Override
     protected void onStop() {
         super.onStop();
@@ -136,6 +139,12 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
         RequestCapture epcis = new RequestCapture();
 
         setAssignInfo();
+        if(test)
+        {
+            patient_lat = 37.490678;
+            patient_lon = 127.048493;
+
+        }
 
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
                 "<!DOCTYPE project>\n" +
@@ -181,7 +190,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
                 "        <accident:hostpital_lat>" + hospital_lat+ "</accident:hostpital_lat>\n" +
                 "        <accident:hostpital_lon>" + hospital_lon+ "</accident:hostpital_lon>\n" +
                 "        <accident:type>" + accidentInfo.getAccidentType()+ "</accident:type>\n" +
-                "        <accident:ambulance>" + SGTIN+ "</accident:ambulance>\n" +
+                "        <accident:ambulance>" + SGTIN1+ "</accident:ambulance>\n" +
 
                 "      </ObjectEvent>\n" +
                 "    </EventList>\n" +
@@ -219,6 +228,13 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
         String eventDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format((System.currentTimeMillis()));
         String eventTime = new java.text.SimpleDateFormat("HH:mm:ss").format((System.currentTimeMillis()));
 
+        if(test)
+        {
+            locationX = 37.491050;
+            locationY = 127.055223;
+            locationX2 = 37.483955;
+            locationY2 = 127.042868;
+        }
 
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
                 "<!DOCTYPE project>\n" +
@@ -234,7 +250,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
                 "\n" +
                 "        <!--  What -->\n" +
                 "        <epcList>\n" +
-                "          <epc>" + SGTIN + "</epc>\n" +
+                "          <epc>" + SGTIN1 + "</epc>\n" +
                 "        </epcList>\n" +
                 "        <!-- What!-->\n" +
                 "\n" +
@@ -258,7 +274,47 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
                 "    </EventList>\n" +
                 "  </EPCISBody>\n" +
                 "</epcis:EPCISDocument>";
+
+        String xml2 = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+                "<!DOCTYPE project>\n" +
+                "<epcis:EPCISDocument xmlns:epcis=\"urn:epcglobal:epcis:xsd:1\" \n" +
+                "                     schemaVersion=\"1.2\" creationDate=\"2016-11-13T11:30:47.0Z\">\n" +
+                "  <EPCISBody>\n" +
+                "    <EventList>\n" +
+                "      <ObjectEvent>\n" +
+                "        <!-- When -->\n" +
+                "        <eventTime>" + eventDate + "T" + eventTime + ".116-10:00</eventTime>\n" +
+                "        <eventTimeZoneOffset>-10:00</eventTimeZoneOffset>\n" +
+                "        <!-- When! -->\n" +
+                "\n" +
+                "        <!--  What -->\n" +
+                "        <epcList>\n" +
+                "          <epc>" + SGTIN2 + "</epc>\n" +
+                "        </epcList>\n" +
+                "        <!-- What!-->\n" +
+                "\n" +
+                "        <!-- Add, Observe, Delete -->\n" +
+                "        <action>ADD</action>\n" +
+                "\n" +
+                "        <!-- Why -->\n" +
+                "        <bizStep>urn:epcglobal:cbv:bizstep:"+ event +"</bizStep>\n" +
+                "        <disposition>urn:epcglobal:cbv:disp:" + event2 + "</disposition>\n" +
+                "        <!-- Why! -->\n" +
+                "\n" +
+                "        <!-- Where -->\n" +
+                "        <bizLocation>\n" +
+                "          <id>urn:epc:id:sgln:7654321.54321.1234</id>\n" +
+                "          <extension>\n" +
+                "            <geo>" + locationX2 + "," + locationY2 + "</geo>\n" +
+                "          </extension>\n" +
+                "        </bizLocation>\n" +
+                "        <!-- Where! -->\n" +
+                "      </ObjectEvent>\n" +
+                "    </EventList>\n" +
+                "  </EPCISBody>\n" +
+                "</epcis:EPCISDocument>";
         epcis.execute(xml);
+        epcis.equals(xml2);
     }
     /** gps start**/
     @Override

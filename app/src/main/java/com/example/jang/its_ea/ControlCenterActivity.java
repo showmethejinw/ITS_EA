@@ -229,6 +229,7 @@ public class ControlCenterActivity extends AppCompatActivity {
 //        listview.setAdapter(adapter);
 //        listview.setBackgroundColor(Color.rgb(25,25,25));
 
+
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
