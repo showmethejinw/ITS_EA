@@ -21,6 +21,7 @@ public class AccidentInfo implements Serializable{
     private double hospitalLat;
     private String status;
     private String gdtiId;
+    private String sgtinId;
 
     public int getCount() {
         return count;
@@ -36,6 +37,10 @@ public class AccidentInfo implements Serializable{
 
     public void setAddressLat(double addressLat) {
         this.addressLat = addressLat;
+    }
+
+    public void setSgtinId(String id) {
+        this.sgtinId = id;
     }
 
     public double getAddressLon() {
@@ -149,5 +154,9 @@ public class AccidentInfo implements Serializable{
 
     public String getGdtiId() {
         return gdtiId;
+    }
+
+    public String getSgtinId() {
+        return sgtinId;
     }
 }

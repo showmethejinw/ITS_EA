@@ -78,6 +78,10 @@ public class IconTextItem2 {
         return mSelectable;
     }
 
+    public void addStringByIndex(int index, String str) {
+        if (!str.isEmpty())
+            mData[index] = str;
+    }
     /**
      * Set selectable flag
      */

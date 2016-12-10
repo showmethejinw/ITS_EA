@@ -307,9 +307,6 @@ public class ControlCenterActivity extends AppCompatActivity {
 
         listview = (ListView) findViewById(R.id.listview);
         adapter = new IconTextListAdapter2(this);
-//
-//        listview.setAdapter(adapter);
-
     }
 
     private Document parseXML(InputStream stream) throws Exception{
@@ -336,27 +333,16 @@ public class ControlCenterActivity extends AppCompatActivity {
         Document doc = parseXML(input);
         NodeList descNodes = doc.getElementsByTagName("ObjectEvent");
         accidentInfoList = new AccidentInfo[descNodes.getLength()];
-
+        IconTextItem2 itemList;
 
         for(int i=0; i<descNodes.getLength();i++){
             accidentInfoList[i] = new AccidentInfo();
-
+            itemList = new IconTextItem2("","","");
             for(Node node = descNodes.item(i).getFirstChild(); node!=null; node=node.getNextSibling()){ //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
 
                 if(node.getNodeName().equals("accident:address")){
-
                     accidentInfoList[i].setAddress(node.getTextContent());
-                    String [] array = new String[3];
-                    array[0] = new String();
-                    array[1] = new String();
-                    array[2] = new String();
-
-                    array[0] = node.getTextContent();
-                    array[1] = "test";
-                    array[2] = "test2";
-                    adapter.addItem(new IconTextItem2(node.getTextContent(), "test", "test2"));
-                    listview.setAdapter(adapter);
-
+                    itemList.addStringByIndex(1, node.getTextContent());
                     Log.d("result_", node.getTextContent());      //결과값
                 }
                 else if(node.getNodeName().equals("accident:age"))
@@ -384,14 +370,17 @@ public class ControlCenterActivity extends AppCompatActivity {
                 {
                     accidentInfoList[i].setAccidentType(node.getTextContent());
                 }
+                else if (node.getNodeName().equals("bizStep")) {
+                    accidentInfoList[i].setStatus(node.getTextContent().replace(" ", "").split(":")[4]);
+                    itemList.addStringByIndex(2, node.getTextContent().replace(" ", "").split(":")[4]);
+                }
                 else if(node.getNodeName().equals("epcList")) {
-//                    Node tempNode = node.getFirstChild();
-//                    if (tempNode.getNodeName().equals("epc"))
-//                    Log.d("EPC", tempId);
-//                    accidentInfoList[i].setGdtiId(tempId);
-                     accidentInfoList[i].setGdtiId(node.getTextContent().replace(" ", "").split(":")[4]);
+                    accidentInfoList[i].setGdtiId(node.getTextContent().replace(" ", "").split(":")[4]);
+                    itemList.addStringByIndex(0, (node.getTextContent().replace(" ", "").split(":")[4]).split("\\.")[2]);
                 }
             }
+            adapter.addItem(itemList);
+            listview.setAdapter(adapter);
 
         }
     }
