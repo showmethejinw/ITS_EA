@@ -62,6 +62,8 @@ public class ControlCenterActivity extends AppCompatActivity {
     private TabHost tab_host;
     private AccidentInfo[] accidentInfoList;
     private int number;
+    private int position;
+    IconTextItem2 itemList;
 
     @Override
     public void onBackPressed() {
@@ -303,6 +305,7 @@ public class ControlCenterActivity extends AppCompatActivity {
 
         listview = (ListView) findViewById(R.id.listview);
         adapter = new IconTextListAdapter2(this);
+        position = 0;
     }
 
     private Document parseXML(InputStream stream) throws Exception {
@@ -329,7 +332,7 @@ public class ControlCenterActivity extends AppCompatActivity {
         Document doc = parseXML(input);
         NodeList descNodes = doc.getElementsByTagName("ObjectEvent");
         accidentInfoList = new AccidentInfo[descNodes.getLength()];
-        IconTextItem2 itemList;
+//        IconTextItem2 tempItem;
 
         for (int i = 0; i < descNodes.getLength(); i++) {
             accidentInfoList[i] = new AccidentInfo();
@@ -344,6 +347,7 @@ public class ControlCenterActivity extends AppCompatActivity {
                     accidentInfoList[i].setAge(node.getTextContent());
                 } else if (node.getNodeName().equals("accident:symptom")) {
                     accidentInfoList[i].setSymptom(node.getTextContent());
+                    itemList.addStringByIndex(2, node.getTextContent());
                 } else if (node.getNodeName().equals("accident:name")) {
                     accidentInfoList[i].setName(node.getTextContent());
                 } else if (node.getNodeName().equals("accident:phonenumber")) {
@@ -355,7 +359,7 @@ public class ControlCenterActivity extends AppCompatActivity {
                     accidentInfoList[i].setAccidentType(node.getTextContent());
                 } else if (node.getNodeName().equals("bizStep")) {
                     accidentInfoList[i].setStatus(node.getTextContent().replace(" ", "").split(":")[4]);
-                    itemList.addStringByIndex(2, node.getTextContent().replace(" ", "").split(":")[4]);
+//                    itemList.addStringByIndex(2, node.getTextContent().replace(" ", "").split(":")[4]);
                 } else if (node.getNodeName().equals("epcList")) {
                     accidentInfoList[i].setGdtiId(node.getTextContent().replace(" ", "").split(":")[4]);
                     itemList.addStringByIndex(0, (node.getTextContent().replace(" ", "").split(":")[4]).split("\\.")[2]);
@@ -364,10 +368,21 @@ public class ControlCenterActivity extends AppCompatActivity {
             }
             adapter.addItem(itemList);
             listview.setAdapter(adapter);
-
         }
-    }
 
+//            Log.d("accident inf", "size = " + accidentInfoList.length);
+//            for (int i = 0; i < accidentInfoList.length; i++) {
+//                position = i;
+//                Thread.sleep(100);
+//                getAccidentStatus(accidentInfoList[position].getGdtiId());
+//            }
+//
+//            for (int i = 0; i < accidentInfoList.length; i++) {
+//                    tempItem = new IconTextItem2(accidentInfoList[i].getGdtiId(), accidentInfoList[i].getAddress(), accidentInfoList[i].getStatus());
+//                    adapter.addItem(tempItem);
+//                    listview.setAdapter(adapter);
+//            }
+    }
 
     private void queryEvent() {
 
@@ -390,4 +405,92 @@ public class ControlCenterActivity extends AppCompatActivity {
         });
         epcis.execute("EQ_bizStep=urn:epcglobal:cbv:bizstep:opening");
     }
+
+    private void updateStatus(InputStream input) throws Exception {
+        Document doc = parseXML(input);
+        NodeList descNodes = doc.getElementsByTagName("ObjectEvent");
+        IconTextItem2 tempItem;
+        Log.d("updateStatus", "updateStatus = "  +descNodes.getLength());
+//        itemList = new IconTextItem2("", "", "");
+        for (int i = 0; i < descNodes.getLength(); i++) {
+            for (Node node = descNodes.item(i).getFirstChild(); node != null; node = node.getNextSibling()) { //첫번째 자식을 시작으로 마지막까지 다음 형제를 실행
+                if(node.getNodeName().equals("bizStep"))
+                {
+                    accidentInfoList[position].setStatus(node.getTextContent().replace(" ", "").split(":")[4]);
+                    Log.d("position", "position = " +position + "result= " + node.getTextContent().replace(" ", "").split(":")[4]);
+//                    tempItem = new IconTextItem2(accidentInfoList[i].getGdtiId(), accidentInfoList[i].getAddress(), accidentInfoList[i].getStatus());
+//                    adapter.addItem(tempItem);
+//                    listview.setAdapter(adapter);
+                }
+            }
+        }
+    }
+
+    private void getAccidentStatus(String query) {
+
+        RequestQuery epcis = new RequestQuery(getApplicationContext(), new OnEventListener<String>() {
+            @Override
+            public void onSuccess(String result) {
+                InputStream input;
+
+                try {
+                    input = new ByteArrayInputStream(result.getBytes("utf-8"));
+                    updateStatus(input);
+                } catch (Exception e) {
+                }
+            }
+
+            public void onFailure(Exception e) {
+                Log.i("fail", "Failted to query from epcis");
+            }
+        });
+        epcis.execute("orderBy=eventTime&eventCountLimit=1&" + "MATCH_epc=urn:epc:id:gdti:" + query);
+    }
+//    HashMap<String, String> hashMap = new HashMap<>();
+//
+//    for (int loop = 0; loop < accidentInfoList.length; loop++) {
+//        accidentInfoList[loop].setCount(0);
+//        hashMap.put(accidentInfoList[loop].getAddress(), "0");
+//        int count = 0;
+//
+//        temp = Integer.valueOf(hashMap.get(accidentInfoList[loop].getAddress())) + 1;
+//        for (int j = 0; j < accidentInfoList.length; j++) {
+//            if (accidentInfoList[loop].getAddress().equals(accidentInfoList[j].getAddress())) {
+//                hashMap.remove(accidentInfoList[loop].getAddress());
+//                hashMap.put(accidentInfoList[loop].getAddress(), String.valueOf(temp));
+////                    accidentInfoList[loop].setCount((accidentInfoList[loop].getCount()));
+//            }
+//        }
+////            if (count == 1) {
+////                adapter.addItem(new IconTextItem2(accidentInfoList[loop].getStatus(), accidentInfoList[loop].getAddress(), accidentInfoList[loop].getGdtiId()));
+////                listview.setAdapter(adapter);
+////            } else if (count == 2) {
+////                adapter.addItem(new IconTextItem2(accidentInfoList[loop].getStatus(), accidentInfoList[loop].getAddress(), accidentInfoList[loop].getGdtiId()));
+////                listview.setAdapter(adapter);
+////
+////            } else if (count == 3) {
+////                adapter.addItem(new IconTextItem2(accidentInfoList[loop].getStatus(), accidentInfoList[loop].getAddress(), accidentInfoList[loop].getGdtiId()));
+////                listview.setAdapter(adapter);
+////            }
+//
+//
+//    }
+//
+//    for(int i = 0; i < accidentInfoList.length; i++)
+//    {
+//        if(Integer.valueOf(hashMap.get(accidentInfoList[i].getAddress())) == 1)
+//        {
+//            adapter.addItem(new IconTextItem2(accidentInfoList[i].getStatus(), accidentInfoList[i].getAddress(), accidentInfoList[i].getGdtiId()));
+//        } else if(Integer.valueOf(hashMap.get(accidentInfoList[i].getAddress())) == 2 )
+//        {
+//            adapter.addItem(new IconTextItem2(accidentInfoList[i].getStatus(), accidentInfoList[i].getAddress(), accidentInfoList[i].getGdtiId()));
+//
+//        }else if(Integer.valueOf(hashMap.get(accidentInfoList[i].getAddress())) >= 3)
+//        {
+//            adapter.addItem(new IconTextItem2(accidentInfoList[i].getStatus(), accidentInfoList[i].getAddress(), accidentInfoList[i].getGdtiId()));
+//
+//        }
+//        listview.setAdapter(adapter);
+//    }
+
 }
