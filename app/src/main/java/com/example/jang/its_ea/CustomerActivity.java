@@ -533,6 +533,24 @@ public class CustomerActivity extends Activity implements
     private void addMarkersToMap() {
         Log.d(TAG, "am01 : " + mEPCISBizStep[0] + " ,am02 : " + mEPCISBizStep[1]);
 
+        mMyCar = googleMap.addMarker(new MarkerOptions()
+                .position(myCar)
+                .title("내 차")
+                .snippet("내 차")
+                .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.car))));
+
+        mAccidentLoc01 = googleMap.addMarker(new MarkerOptions()
+                .position(accidentLoc01)
+                .title("사고지점")
+                .snippet("사고지점")
+                .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.warning))));
+
+        mAccidentLoc02 = googleMap.addMarker(new MarkerOptions()
+                .position(accidentLoc02)
+                .title("사고지점")
+                .snippet("사고지점")
+                .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.warning))));
+
         if (mEPCISBizStep[0] == null) return;
         else if (mEPCISBizStep[0].equals("departuring")) {
             mAmbulance01 = googleMap.addMarker(new MarkerOptions()
@@ -566,23 +584,6 @@ public class CustomerActivity extends Activity implements
             }
         }
 
-        mMyCar = googleMap.addMarker(new MarkerOptions()
-                .position(myCar)
-                .title("내 차")
-                .snippet("내 차")
-                .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.car))));
-
-        mAccidentLoc01 = googleMap.addMarker(new MarkerOptions()
-                .position(accidentLoc01)
-                .title("사고지점")
-                .snippet("사고지점")
-                .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.warning))));
-
-        mAccidentLoc02 = googleMap.addMarker(new MarkerOptions()
-                .position(accidentLoc02)
-                .title("사고지점")
-                .snippet("사고지점")
-                .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.warning))));
     }
 
     private void addCircleToMap(boolean near) {
