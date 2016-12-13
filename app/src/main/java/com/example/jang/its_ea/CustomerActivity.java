@@ -551,7 +551,8 @@ public class CustomerActivity extends Activity implements
                 .snippet("사고지점")
                 .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.warning))));
 
-        if (mEPCISBizStep[0] == null) return;
+        if (mEPCISBizStep[0] == null)
+            Log.d(TAG, "mEPCISBizStep[0] is null");
         else if (mEPCISBizStep[0].equals("departuring")) {
             mAmbulance01 = googleMap.addMarker(new MarkerOptions()
                     .position(ambulance01)
@@ -568,7 +569,8 @@ public class CustomerActivity extends Activity implements
             }
         }
 
-        if (mEPCISBizStep[1] == null) return;
+        if (mEPCISBizStep[1] == null)
+            Log.d(TAG, "mEPCISBizStep[1] is null");
         else if(mEPCISBizStep[1].equals("departuring")) {
             mAmbulance02 = googleMap.addMarker(new MarkerOptions()
                     .position(ambulance02)
