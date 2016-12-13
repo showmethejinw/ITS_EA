@@ -306,6 +306,10 @@ public class ControlCenterActivity extends AppCompatActivity {
         listview = (ListView) findViewById(R.id.listview);
         adapter = new IconTextListAdapter2(this);
         position = 0;
+
+//        itemList = new IconTextItem2("출동번호", "위치", "증상");
+//        adapter.addItem(itemList);
+//        listview.setAdapter(adapter);
     }
 
     private Document parseXML(InputStream stream) throws Exception {
