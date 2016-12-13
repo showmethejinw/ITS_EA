@@ -76,7 +76,7 @@ public class ControlCenterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.testing_layout);
+        setContentView(R.layout.controlcenter_layout);
 
         init();
 

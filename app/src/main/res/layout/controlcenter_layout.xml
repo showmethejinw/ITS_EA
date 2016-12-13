@@ -1,156 +1,281 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    >
+    android:orientation="vertical">
 
-    <TableLayout
+    <TabHost
+        android:id="@+id/tabhost"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:gravity="center"
-        >
+        android:layout_height="fill_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"></TabWidget>
+
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+                <ScrollView
+                    android:id="@+id/tab1"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+
+                    <TableLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:gravity="center">
 
 
-        <TableRow
-            android:layout_height="fill_parent"
-            android:layout_width="fill_parent"
-            >
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="긴급도"
-                android:layout_weight="1"/>
-            <Spinner
-                android:id="@+id/spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="3.5"/>
+                        <TableRow
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent">
 
-        </TableRow>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="긴급도" />
 
-        <TableRow
-            android:layout_height="fill_parent"
-            android:layout_width="fill_parent"
-            >
+                            <Spinner
+                                android:id="@+id/spinner"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="3.5" />
 
-            <TextView
-                android:layout_weight="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="주소"/>
+                        </TableRow>
 
-            <EditText
-                android:id="@+id/et_address"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="3.5"
-                android:text="서울특별시 강남구 도곡동 514-5"/>
+                        <TableRow
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent">
 
-        </TableRow>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="주소" />
 
-        <TableRow
-            android:layout_height="fill_parent"
-            android:layout_width="fill_parent"
-            >
+                            <EditText
+                                android:id="@+id/et_address"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="3.5"
+                                android:text="서울특별시 강남구 도곡동 514-5" />
 
-            <TextView
-                android:layout_weight="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="증상"/>
+                        </TableRow>
 
-            <EditText
-                android:id="@+id/et_symptom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="3.5"
-                android:text="복통"/>
+                        <TableRow
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent">
 
-        </TableRow>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="증상" />
 
-        <TableRow
-            android:layout_height="fill_parent"
-            android:layout_width="fill_parent"
-            >
+                            <EditText
+                                android:id="@+id/et_symptom"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="3.5"
+                                android:text="복통" />
 
-            <TextView
-                android:layout_weight="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="연령"/>
+                        </TableRow>
 
-            <EditText
-                android:id="@+id/et_age"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="3.5"
-                android:text="99"/>
+                        <TableRow
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent">
 
-        </TableRow>
-        <TableRow
-            android:layout_height="fill_parent"
-            android:layout_width="fill_parent"
-            >
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="연령" />
 
-            <TextView
-                android:layout_weight="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="신고자 이름"/>
+                            <EditText
+                                android:id="@+id/et_age"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="3.5"
+                                android:text="99" />
 
-            <EditText
-                android:id="@+id/et_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="3.5"
-                android:text="서장훈"/>
+                        </TableRow>
 
-        </TableRow>
+                        <TableRow
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent">
 
-        <TableRow
-            android:layout_height="fill_parent"
-            android:layout_width="fill_parent"
-            >
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="신고자 이름" />
 
-            <TextView
-                android:layout_weight="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="연락처"/>
+                            <EditText
+                                android:id="@+id/et_name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="3.5"
+                                android:text="서장훈" />
 
-            <EditText
-                android:id="@+id/et_phonenumber"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="3.5"
-                android:text="01044457895"/>
+                        </TableRow>
 
-        </TableRow>
+                        <TableRow
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent">
 
-        <TableRow
-            android:layout_height="fill_parent"
-            android:layout_width="fill_parent"
-            >
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="연락처" />
 
-            <TextView
-                android:layout_weight="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="병원주소"/>
+                            <EditText
+                                android:id="@+id/et_phonenumber"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="3.5"
+                                android:text="01041457899" />
 
-            <EditText
-                android:id="@+id/et_hospitaladdress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="3.5"
-                android:text="서울시 강남구 일원동 50"/>
+                        </TableRow>
 
-        </TableRow>
+                        <TableRow
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent">
 
-        <Button
-            android:id="@+id/btn_send"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="전송"/>
-    </TableLayout>
-</RelativeLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="병원주소" />
+
+                            <EditText
+                                android:id="@+id/et_hospitaladdress"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="3.5"
+                                android:text="서울 강남구 일원동 50" />
+
+                        </TableRow>
+
+                        <Button
+                            android:id="@+id/btn_send"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:text="전송" />
+                    </TableLayout>
+
+
+                </ScrollView>
+
+
+                <!--tab 2 영역!-->
+                <!--<ScrollView-->
+                <!--android:id="@+id/tab2"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent" >-->
+
+
+                <LinearLayout
+                    android:id="@+id/tab2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/first"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="#000000"
+                        android:gravity="center"
+                        android:text="출동 정보"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20pt"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#FF0000"
+                        android:text=" "
+                        android:textSize="1pt"/>
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/dataItem01"
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:padding="4dp"
+                            android:paddingRight="20dp"
+                            android:textSize="20dp"
+                            android:textStyle="bold"
+                            android:textColor="#FFFFFF"
+                            android:background="#000000"
+                            android:text="사건 번호"/>
+
+                        <TextView
+                            android:id="@+id/dataItem02"
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:padding="4dp"
+                            android:paddingRight="20dp"
+                            android:textSize="20dp"
+                            android:textColor="#FFFFFF"
+                            android:background="#000000"
+                            android:textStyle="bold"
+                            android:text="주소"/>
+
+                        <TextView
+                            android:id="@+id/dataItem03"
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:padding="4dp"
+                            android:paddingRight="20dp"
+                            android:textColor="#FFFFFF"
+                            android:background="#000000"
+                            android:textSize="20dp"
+                            android:textStyle="bold"
+                            android:text="증상"/>
+
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#FF0000"
+                        android:text=" "
+                        android:textSize="1pt"/>
+
+                    <ListView
+                        android:id="@+id/listview"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_below="@id/first"
+                        android:layout_weight="10" />
+                </LinearLayout>
+                <!--</ScrollView>-->
+
+            </FrameLayout>
+        </LinearLayout>
+    </TabHost>
+
+</LinearLayout>
