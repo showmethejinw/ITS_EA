@@ -240,21 +240,25 @@ public class AmbulanceActivity extends AppCompatActivity {
 
         for(int i = 0; i < accidentInfo.length; i++)
         {
-            int count = 0;
-            for(int j = 0; j < accidentInfo.length; j++)
+            if(accidentInfo[i].getAddress() != null)
             {
-                if(accidentInfo[i].getAddress().equals(accidentInfo[j].getAddress()))
+                int count = 0;
+                for(int j = 0; j < accidentInfo.length; j++)
                 {
-                    count++;
-                    if(count > 1)
-                        break;
+                    if(accidentInfo[i].getAddress().equals(accidentInfo[j].getAddress()))
+                    {
+                        count++;
+                        if(count > 1)
+                            break;
+                    }
+                }
+                if(count == 1)
+                {
+                    adapter.addItem(new IconTextItem(accidentInfo[i].getAddress()));
+                    listview.setAdapter(adapter);
                 }
             }
-            if(count == 1)
-            {
-                adapter.addItem(new IconTextItem(accidentInfo[i].getAddress()));
-                listview.setAdapter(adapter);
-            }
+
         }
     }
 
