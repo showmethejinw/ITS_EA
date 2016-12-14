@@ -573,7 +573,7 @@ public class CustomerActivity extends Activity implements
                 return true;
             }
             return false;
-        } else if (0 < dist && dist <= 50) {
+        } else if (0 <= dist && dist <= 50) {
             if (mEPCISBizStep[0].equals("departuring")) {
                 if(flag3 == 0)
                 {
