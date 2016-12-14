@@ -5,6 +5,7 @@ package com.example.jang.its_ea;
  */
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +18,9 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -53,6 +56,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.vision.text.Text;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -61,8 +65,11 @@ import org.w3c.dom.NodeList;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -109,7 +116,9 @@ public class CustomerActivity extends Activity implements
     private CircleOptions circleOptions;
     private AccidentInfo[] accidentInfo;
 
+    private TextToSpeech tts;
 
+    private int flag1 = 0, flag2 = 0, flag3 = 0;
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -183,6 +192,42 @@ public class CustomerActivity extends Activity implements
         infoText.setTextColor(Color.BLACK);
         infoText.setText("주행을 시작합니다. 안전 운전 하세요.");
         locationText.setText("현 지점 : " + getAddress(this, 0, 0));
+
+        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    // 음성 합성하여 출력하기위한 언어를 Locale.US 로 설정한다.
+                    // 안드로이드 시스템의 환경 설정에서도 동일한 언어가 선택되어 있어야만
+                    // 해당 언어의 문장이 음성변환 될 수 있다.
+                    int result = tts.setLanguage(Locale.KOREA);
+
+                    // 해당 언어에 대한 데이터가 없거나 지원하지 않는 경우
+                    if (result == TextToSpeech.LANG_MISSING_DATA ||
+                            result == TextToSpeech.LANG_NOT_SUPPORTED) {
+
+                        // 해당 언어는 사용할 수 없음을 알린다.
+                        toast("Language is not available.");
+
+                        // TTS 엔진이 해당 언어를 지원하며 데이터도 가지고 있는 경우
+                    } else {
+                        // TTS 엔진이 성공적으로 초기화된 경우
+                        // EditText 에 쓰여지는 문장을 음성 변환할 수 있도록 버튼을 활성화한다.
+//                        for (int id : btnIds) {
+//                            btn = (Button) findViewById(id);
+//                            btn.setEnabled(true);
+//                        }
+                    }
+
+                    // TextToSpeech 엔진 초기화에 실패하여 엔진이 TextToSpeech.ERROR 상태인 경우
+                } else {
+                    // TextToSpeech 엔진이 초기화되지 못했음을 알린다.
+                    toast("Could not initialize TextToSpeech.");
+                }
+            }
+        });
+
+
     }
 
     @Override
@@ -278,22 +323,22 @@ public class CustomerActivity extends Activity implements
         googleMap.clear();
 //        Marker seoul = googleMap.addMarker(new MarkerOptions().position(CURRENT_LOCATION)
 //                .title("사용자 위치"));
-
+//        tts("테스트 중입니다");
         queryEvent(SGTIN1);
         queryEvent(SGTIN2);
         queryEvent(SGDTI);
 
         Log.d(TAG, "SendHandleMsg");
         if (checkDistance(locationX, locationY, mEPCISLocationX[0], mEPCISLocationY[0]) ||
-                    checkDistance(locationX, locationY, mEPCISLocationX[1], mEPCISLocationY[1])) {
-                infoImageView.setImageResource(R.drawable.emergency);
-                infoText.setTextColor(Color.RED);
-                infoText.setText("이동 경로로 구급차가 접근 중입니다. 길을 양보해주세요.");
-                locationText.setTextColor(Color.RED);
+                checkDistance(locationX, locationY, mEPCISLocationX[1], mEPCISLocationY[1])) {
+            infoImageView.setImageResource(R.drawable.emergency);
+            infoText.setTextColor(Color.RED);
+            infoText.setText("이동 경로로 구급차가 접근 중입니다. 길을 양보해주세요.");
+            locationText.setTextColor(Color.RED);
             if (mEPCISLocationX[2] != 0 && mEPCISLocationX[3] == 0) {
                 locationText.setText("사고 지점 : " + getAddress(CustomerActivity.this, mEPCISLocationX[2], mEPCISLocationY[2]));
             } else if (mEPCISLocationX[2] != 0 && mEPCISLocationX[3] != 0) {
-                locationText.setText("사고지점 1: " + getAddress(CustomerActivity.this, mEPCISLocationX[2], mEPCISLocationY[2]) +"\n사고지점 2: " + getAddress(CustomerActivity.this, mEPCISLocationX[3], mEPCISLocationY[3]));
+                locationText.setText("사고지점 1: " + getAddress(CustomerActivity.this, mEPCISLocationX[2], mEPCISLocationY[2]) + "\n사고지점 2: " + getAddress(CustomerActivity.this, mEPCISLocationX[3], mEPCISLocationY[3]));
             } else {
                 locationText.setText("사고 지점 : 위치를 파악할 수 없습니다.");
             }
@@ -395,7 +440,7 @@ public class CustomerActivity extends Activity implements
                     if (mEPCISLocationX[2] == 0 && mEPCISLocationY[2] == 0) {
                         mEPCISLocationX[2] = accidentInfo[i].getAddressLat();
                         mEPCISLocationY[2] = accidentInfo[i].getAddressLon();
-                    } else if(accidentInfo[i].getAddressLat() != mEPCISLocationX[2] && accidentInfo[i].getAddressLon() != mEPCISLocationY[2]) {
+                    } else if (accidentInfo[i].getAddressLat() != mEPCISLocationX[2] && accidentInfo[i].getAddressLon() != mEPCISLocationY[2]) {
                         mEPCISLocationX[3] = accidentInfo[i].getAddressLat();
                         mEPCISLocationY[3] = accidentInfo[i].getAddressLon();
                     }
@@ -498,19 +543,52 @@ public class CustomerActivity extends Activity implements
 
         double dist = distance(myX1, myY1, ambulX2, ambulY2, "meter");
         //Log.d(TAG, "dist : " + dist);
-        if ((0 <= dist) && (dist < 200)) {
-            if (mEPCISBizStep[0] == null || mEPCISBizStep[1] == null  ) {
+        if ((100 < dist) && (dist < 200)) {
+            if (mEPCISBizStep[0] == null || mEPCISBizStep[1] == null) {
                 return false;
             } else if (mEPCISBizStep[0].equals("departuring")) {
+                if(flag1 == 0)
+                {
+                    tts("이동 경로로 구급차가 접근 중입니다. 길을 양보해주세요.");
+                    tts("응급차가 200미터 이내에 접근 중입니다");
+                    flag1++;
+                }
+
                 return true;
             } else if (mEPCISBizStep[1].equals("departuring")) {
                 return true;
             }
             return false;
-        } else {
+        } else if (50 < dist && dist <= 100) {
+            if (mEPCISBizStep[0].equals("departuring")) {
+                if(flag2 == 0)
+                {
+                    tts("이동 경로로 구급차가 접근 중입니다. 길을 양보해주세요.");
+                    tts("응급차가 100미터 이내에 접근 중입니다");
+                    flag2++;
+                }
+                return true;
+            } else if (mEPCISBizStep[1].equals("departuring")) {
+                return true;
+            }
             return false;
-        }
+        } else if (0 < dist && dist <= 50) {
+            if (mEPCISBizStep[0].equals("departuring")) {
+                if(flag3 == 0)
+                {
+                    tts("이동 경로로 구급차가 접근 중입니다. 길을 양보해주세요.");
+                    tts("응급차가 50미터 이내에 접근 중입니다");
+                    flag3++;
+                }
+                return true;
+            } else if (mEPCISBizStep[1].equals("departuring")) {
+                return true;
+            }
+            return false;
+        } else
+            return false;
     }
+
 
     public Bitmap bitmapSizeByScall(Bitmap bitmapIn, float scall_zero_to_one_f) {
 
@@ -533,6 +611,39 @@ public class CustomerActivity extends Activity implements
     private void addMarkersToMap() {
         Log.d(TAG, "am01 : " + mEPCISBizStep[0] + " ,am02 : " + mEPCISBizStep[1]);
 
+        if (mEPCISBizStep[0] == null) return;
+        else if (mEPCISBizStep[0].equals("departuring")) {
+            mAmbulance01 = googleMap.addMarker(new MarkerOptions()
+                    .position(ambulance01)
+                    .title("응급차1")
+                    .snippet("도곡 1호차")
+                    //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
+                    .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
+        } else {
+            Log.d(TAG, "mAmbulance01 : remove");
+            try {
+                mAmbulance01.remove();
+            } catch (Exception e) {
+                Log.d(TAG, "mAmbulance01 is null");
+            }
+        }
+
+        if (mEPCISBizStep[1] == null) return;
+        else if (mEPCISBizStep[1].equals("departuring")) {
+            mAmbulance02 = googleMap.addMarker(new MarkerOptions()
+                    .position(ambulance02)
+                    .title("응급차2")
+                    .snippet("도곡 2호차")
+                    .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
+        } else {
+            Log.d(TAG, "mAmbulance02 : remove");
+            try {
+                mAmbulance02.remove();
+            } catch (Exception e) {
+                Log.d(TAG, "mAmbulance02 is null");
+            }
+        }
+
         mMyCar = googleMap.addMarker(new MarkerOptions()
                 .position(myCar)
                 .title("내 차")
@@ -550,42 +661,6 @@ public class CustomerActivity extends Activity implements
                 .title("사고지점")
                 .snippet("사고지점")
                 .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.warning))));
-
-        if (mEPCISBizStep[0] == null)
-            Log.d(TAG, "mEPCISBizStep[0] is null");
-        else if (mEPCISBizStep[0].equals("departuring")) {
-            mAmbulance01 = googleMap.addMarker(new MarkerOptions()
-                    .position(ambulance01)
-                    .title("응급차1")
-                    .snippet("도곡 1호차")
-                    //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
-                    .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
-        } else {
-            Log.d(TAG, "mAmbulance01 : remove");
-            try {
-                mAmbulance01.remove();
-            } catch (Exception e) {
-                Log.d(TAG, "mAmbulance01 is null");
-            }
-        }
-
-        if (mEPCISBizStep[1] == null)
-            Log.d(TAG, "mEPCISBizStep[1] is null");
-        else if(mEPCISBizStep[1].equals("departuring")) {
-            mAmbulance02 = googleMap.addMarker(new MarkerOptions()
-                    .position(ambulance02)
-                    .title("응급차2")
-                    .snippet("도곡 2호차")
-                    .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
-        } else {
-            Log.d(TAG, "mAmbulance02 : remove");
-            try {
-                mAmbulance02.remove();
-            } catch (Exception e) {
-                Log.d(TAG, "mAmbulance02 is null");
-            }
-        }
-
     }
 
     private void addCircleToMap(boolean near) {
@@ -671,6 +746,13 @@ public class CustomerActivity extends Activity implements
         return true;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        tts.stop();
+        tts.shutdown();
+    }
+
     private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
         Log.d(TAG, "enter to disc function");
         double theta = lon1 - lon2;
@@ -715,4 +797,50 @@ public class CustomerActivity extends Activity implements
                 .setActionStatus(Action.STATUS_TYPE_COMPLETED)
                 .build();
     }
+
+    private void toast(String str) {
+        Toast.makeText(CustomerActivity.this, str, Toast.LENGTH_SHORT).show();
+    }
+
+    private void speakTTS(String str) {
+        tts.speak(str, TextToSpeech.QUEUE_ADD, null);
+    }
+
+    public void tts(String str) {
+//        Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
+
+
+        //http://stackoverflow.com/a/29777304
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            ttsGreater21(str);
+        } else {
+            ttsUnder20(str);
+        }
+    }
+
+    private void ttsUnder20(String text) {
+        HashMap<String, String> map = new HashMap<>();
+        map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "MessageId");
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, map);
+
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void ttsGreater21(String text) {
+        String utteranceId = this.hashCode() + "";
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
+    }
+
+
+    class BackThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+            while (true) {
+
+            }
+        }
+    }
+
+
 }
