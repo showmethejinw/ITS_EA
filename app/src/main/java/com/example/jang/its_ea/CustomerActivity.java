@@ -235,7 +235,7 @@ public class CustomerActivity extends Activity implements
 
         mLocationRequest = new LocationRequest();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(3000);
+        mLocationRequest.setInterval(2000);
         mLocationRequest.setFastestInterval(1500);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -561,7 +561,10 @@ public class CustomerActivity extends Activity implements
             }
             return false;
         } else if (50 < dist && dist <= 100) {
-            if (mEPCISBizStep[0].equals("departuring")) {
+            if (mEPCISBizStep[0] == null || mEPCISBizStep[1] == null) {
+                return false;
+            }
+            else if (mEPCISBizStep[0].equals("departuring")) {
                 if(flag2 == 0)
                 {
                     tts("이동 경로로 구급차가 접근 중입니다. 길을 양보해주세요.");
@@ -574,7 +577,10 @@ public class CustomerActivity extends Activity implements
             }
             return false;
         } else if (0 <= dist && dist <= 50) {
-            if (mEPCISBizStep[0].equals("departuring")) {
+            if (mEPCISBizStep[0] == null || mEPCISBizStep[1] == null) {
+                return false;
+            }
+            else if (mEPCISBizStep[0].equals("departuring")) {
                 if(flag3 == 0)
                 {
                     tts("이동 경로로 구급차가 접근 중입니다. 길을 양보해주세요.");
