@@ -53,8 +53,8 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
     private static final String SGTIN1 = "urn:epc:id:sgtin:4012345.077889.25";
     private static final String SGTIN2 = "urn:epc:id:sgtin:4012345.077889.26";
 
-    private boolean test = true;
-//    private boolean test = false;
+//    private boolean test = true;
+    private boolean test = false;
     @Override
     protected void onStop() {
         super.onStop();
@@ -139,7 +139,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
         RequestCapture epcis = new RequestCapture();
 
         setAssignInfo();
-        if(test)
+        if(false)
         {
             patient_lat = 37.490678;
             patient_lon = 127.048493;
@@ -229,12 +229,15 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
         String eventDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format((System.currentTimeMillis()));
         String eventTime = new java.text.SimpleDateFormat("HH:mm:ss").format((System.currentTimeMillis()));
 
-        if(test)
+        if(false)
         {
-            locationX = 37.491050;
-            locationY = 127.055223;
-            locationX2 = 37.483955;
-            locationY2 = 127.042868;
+//            locationX = 37.491050;  //37.486583, 127.039823
+//            locationY = 127.055223;
+            locationX = 37.486583;
+            locationY = 127.039823;
+
+//            locationX2 = 37.483955;
+//            locationY2 = 127.042868;
         }
 
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
@@ -314,7 +317,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
                 "    </EventList>\n" +
                 "  </EPCISBody>\n" +
                 "</epcis:EPCISDocument>";
-        epcis.execute(xml);
+//        epcis.execute(xml);
         epcis2.execute(xml2);
     }
     /** gps start**/
@@ -344,8 +347,8 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
     }
 
     public void onLocationChanged(Location location) {
-        locationX = location.getLatitude();
-        locationY = location.getLongitude();
+        locationX2 = location.getLatitude();
+        locationY2 = location.getLongitude();
 
         updateEvent("departuring", "in_progress");
         Log.d("location___", locationX + ", " +  locationY);
