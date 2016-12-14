@@ -324,7 +324,7 @@ public class CustomerActivity extends Activity implements
 //        Marker seoul = googleMap.addMarker(new MarkerOptions().position(CURRENT_LOCATION)
 //                .title("사용자 위치"));
 //        tts("테스트 중입니다");
-        queryEvent(SGTIN1);
+//        queryEvent(SGTIN1);
         queryEvent(SGTIN2);
         queryEvent(SGDTI);
 
@@ -410,9 +410,9 @@ public class CustomerActivity extends Activity implements
             nodeValueArray = gpsLocation.replace(" ", "").split(",");
 
             if (id == SGTIN1) {
-                mEPCISLocationX[0] = Double.parseDouble(nodeValueArray[0]);
-                mEPCISLocationY[0] = Double.parseDouble(nodeValueArray[1]);
-                mEPCISBizStep[0] = bizStep.split(":")[4];
+//                mEPCISLocationX[0] = Double.parseDouble(nodeValueArray[0]);
+//                mEPCISLocationY[0] = Double.parseDouble(nodeValueArray[1]);
+//                mEPCISBizStep[0] = bizStep.split(":")[4];
             } else if (id == SGTIN2) {
                 mEPCISLocationX[1] = Double.parseDouble(nodeValueArray[0]);
                 mEPCISLocationY[1] = Double.parseDouble(nodeValueArray[1]);
@@ -579,6 +579,7 @@ public class CustomerActivity extends Activity implements
         } else if (0 <= dist && dist <= 50) {
             if (mEPCISBizStep[0] == null || mEPCISBizStep[1] == null) {
                 return false;
+
             }
             else if (mEPCISBizStep[0].equals("departuring")) {
                 if(flag3 == 0)

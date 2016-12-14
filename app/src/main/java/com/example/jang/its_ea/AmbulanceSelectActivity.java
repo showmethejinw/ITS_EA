@@ -229,7 +229,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
         String eventDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format((System.currentTimeMillis()));
         String eventTime = new java.text.SimpleDateFormat("HH:mm:ss").format((System.currentTimeMillis()));
 
-        if(false)
+        if(true)
         {
 //            locationX = 37.491050;  //37.486583, 127.039823
 //            locationY = 127.055223;
@@ -317,7 +317,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
                 "    </EventList>\n" +
                 "  </EPCISBody>\n" +
                 "</epcis:EPCISDocument>";
-//        epcis.execute(xml);
+        epcis.execute(xml);
         epcis2.execute(xml2);
     }
     /** gps start**/
