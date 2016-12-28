@@ -324,7 +324,7 @@ public class CustomerActivity extends Activity implements
 //        Marker seoul = googleMap.addMarker(new MarkerOptions().position(CURRENT_LOCATION)
 //                .title("사용자 위치"));
 //        tts("테스트 중입니다");
-//        queryEvent(SGTIN1);
+        queryEvent(SGTIN1);
         queryEvent(SGTIN2);
         queryEvent(SGDTI);
 
@@ -410,9 +410,9 @@ public class CustomerActivity extends Activity implements
             nodeValueArray = gpsLocation.replace(" ", "").split(",");
 
             if (id == SGTIN1) {
-//                mEPCISLocationX[0] = Double.parseDouble(nodeValueArray[0]);
-//                mEPCISLocationY[0] = Double.parseDouble(nodeValueArray[1]);
-//                mEPCISBizStep[0] = bizStep.split(":")[4];
+                mEPCISLocationX[0] = Double.parseDouble(nodeValueArray[0]);
+                mEPCISLocationY[0] = Double.parseDouble(nodeValueArray[1]);
+                mEPCISBizStep[0] = bizStep.split(":")[4];
             } else if (id == SGTIN2) {
                 mEPCISLocationX[1] = Double.parseDouble(nodeValueArray[0]);
                 mEPCISLocationY[1] = Double.parseDouble(nodeValueArray[1]);
@@ -506,7 +506,8 @@ public class CustomerActivity extends Activity implements
      **/
     private void updateMarkerPosition() {
 
-        ambulance01 = new LatLng(mEPCISLocationX[0], mEPCISLocationY[0]);
+//        ambulance01 = new LatLng(mEPCISLocationX[0], mEPCISLocationY[0]);
+        ambulance01 = new LatLng(37.485507, 127.041398);
         ambulance02 = new LatLng(mEPCISLocationX[1], mEPCISLocationY[1]);
 
         myCar = new LatLng(locationX, locationY);
@@ -637,22 +638,23 @@ public class CustomerActivity extends Activity implements
                 .snippet("사고지점")
                 .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.warning))));
 
-        if (mEPCISBizStep[0] == null)  Log.d(TAG, "am01 : " + mEPCISBizStep[0] + " ,am02 : " + mEPCISBizStep[1]);
-        else if (mEPCISBizStep[0].equals("departuring")) {
+//        if (mEPCISBizStep[0] == null)  Log.d(TAG, "am01 : " + mEPCISBizStep[0] + " ,am02 : " + mEPCISBizStep[1]);
+//        else if (mEPCISBizStep[0].equals("departuring")) {
             mAmbulance01 = googleMap.addMarker(new MarkerOptions()
                     .position(ambulance01)
                     .title("응급차1")
                     .snippet("도곡 1호차")
                     //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
                     .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
-        } else {
-            Log.d(TAG, "mAmbulance01 : remove");
-            try {
-                mAmbulance01.remove();
-            } catch (Exception e) {
-                Log.d(TAG, "mAmbulance01 is null");
-            }
-        }
+//        } else {
+//            mAmbulance01 = googleMap.addMarker(new MarkerOptions()
+//                    .position(ambulance01)
+//                    .title("응급차1")
+//                    .snippet("도곡 1호차")
+//                    //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ambulance)));
+//                    .icon(BitmapDescriptorFactory.fromBitmap(markerIconResToBitmap(R.drawable.ambulance))));
+//        }
+
 
         if (mEPCISBizStep[1] == null)  Log.d(TAG, "am01 : " + mEPCISBizStep[0] + " ,am02 : " + mEPCISBizStep[1]);
         else if (mEPCISBizStep[1].equals("departuring")) {

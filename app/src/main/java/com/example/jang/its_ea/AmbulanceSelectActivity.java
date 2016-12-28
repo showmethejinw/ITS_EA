@@ -81,7 +81,7 @@ public class AmbulanceSelectActivity extends Activity implements LocationListene
         tv_status.setText(
                 "긴급도 : " + accidentInfo.getAccidentType() + "\n"
                         +  "주소 : " + accidentInfo.getAddress() + "\n"
-                        + "이름 : " + accidentInfo.getName() + "\n"
+//                        + "이름 : " + accidentInfo.getName() + "\n"
                         + "연령 : " + accidentInfo.getAge() + "\n"
                         + "신고자 이름 : " + accidentInfo.getName() + "\n"
                         + "신고자 연락처 : " + accidentInfo.getPhoneNumber() + "\n"
